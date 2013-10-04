@@ -1,0 +1,8 @@
+*.gem
+Gemfile.lock
+.rvmrc
+.DS_Store
+/coverage
+
+# IDEs
+.idea
