@@ -6,6 +6,7 @@ module Hammerspace
     class Sparkey < Base
 
       def []=(key, value)
+        close_hash
         open_logwriter
 
         @logwriter[key] = value
