@@ -16,6 +16,6 @@ describe Hammerspace do
     Hammerspace.new(path) { |h| hash = h }
 
     hash.should be_an_instance_of(Hammerspace::Hash)
-  end 
+  end
 
 end

@@ -4,6 +4,7 @@ module Hammerspace
 
   class Hash
     extend Forwardable
+    include Enumerable
 
     attr_reader :path
     attr_reader :options
@@ -19,8 +20,7 @@ module Hammerspace
       :close
 
     DEFAULT_OPTIONS = {
-      :backend        => Hammerspace::Backend::Sparkey,
-      :rewrite_factor => 2
+      :backend        => Hammerspace::Backend::Sparkey
     }
 
     def initialize(path, options={})
