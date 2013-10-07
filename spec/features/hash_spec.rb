@@ -31,6 +31,12 @@ describe Hammerspace do
         hash.close
       end
 
+      it "gets before set" do
+        hash = Hammerspace.new(path, options)
+        hash['foo'].should be_nil
+        hash.close
+      end
+
       it "supports interleaved gets and sets" do
         hash = Hammerspace.new(path, options)
         hash['foo'] = 'bar'
@@ -142,6 +148,26 @@ describe Hammerspace do
           values.should == ['A', 'B']
         end
 
+        it "allows iteration with block when empty" do
+          iterations = 0
+
+          hash = Hammerspace.new(path, options)
+          hash.each { |key,value| iterations += 1 }
+          hash.close
+
+          iterations.should == 0
+        end
+
+        it "allows iteration with enumerator when empty" do
+          iterations = 0
+
+          hash = Hammerspace.new(path, options)
+          hash.each.map { |key,value| iterations += 1 }
+          hash.close
+
+          iterations.should == 0
+        end
+
         it "allows updating during iteration with block" do
           keys = []
           values = []
@@ -240,6 +266,12 @@ describe Hammerspace do
           hash.close
         end
 
+        it "returns empty array when empty" do
+          hash = Hammerspace.new(path, options)
+          hash.keys.should == []
+          hash.close
+        end
+
       end
 
       describe "#values" do
@@ -249,6 +281,66 @@ describe Hammerspace do
           hash['a'] = 'A'
           hash['b'] = 'B'
           hash.values.should == ['A', 'B']
+          hash.close
+        end
+
+        it "returns empty array when empty" do
+          hash = Hammerspace.new(path, options)
+          hash.values.should == []
+          hash.close
+        end
+
+      end
+
+      describe "#size" do
+
+        it "returns size" do
+          hash = Hammerspace.new(path, options)
+          hash['a'] = 'A'
+          hash['b'] = 'B'
+          hash.size.should == 2
+          hash.close
+        end
+
+        it "returns 0 when empty" do
+          hash = Hammerspace.new(path, options)
+          hash.size.should == 0
+          hash.close
+        end
+
+      end
+
+      describe "#length" do
+
+        it "returns size" do
+          hash = Hammerspace.new(path, options)
+          hash['a'] = 'A'
+          hash['b'] = 'B'
+          hash.length.should == 2
+          hash.close
+        end
+
+        it "returns 0 when empty" do
+          hash = Hammerspace.new(path, options)
+          hash.length.should == 0
+          hash.close
+        end
+
+      end
+
+      describe "#empty?" do
+
+        it "returns true when empty" do
+          hash = Hammerspace.new(path, options)
+          hash.empty?.should be_true
+          hash.close
+        end
+
+        it "returns false when not empty" do
+          hash = Hammerspace.new(path, options)
+          hash['a'] = 'A'
+          hash['b'] = 'B'
+          hash.empty?.should be_false
           hash.close
         end
 

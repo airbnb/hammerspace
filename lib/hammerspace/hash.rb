@@ -14,11 +14,14 @@ module Hammerspace
     # TODO: will need to include all of the methods that ruby's Hash supports,
     # or at least Enumerable
     def_delegators :backend,
+      :[]=,
+      :[],
       :each,
       :keys,
       :values,
-      :[],
-      :[]=,
+      :size,
+      :length,
+      :empty?,
       :close
 
     DEFAULT_OPTIONS = {
