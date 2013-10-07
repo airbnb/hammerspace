@@ -25,9 +25,9 @@ module Hammerspace
       :size,
       :values
 
-    alias_method :length, :size
     alias_method :key?, :has_key?
     alias_method :include?, :has_key?
+    alias_method :length, :size
 
     DEFAULT_OPTIONS = {
       :backend        => Hammerspace::Backend::Sparkey
@@ -39,6 +39,11 @@ module Hammerspace
 
       construct_backend
     end
+
+    def has_value?(value)
+      !!find { |k,v| v == value }
+    end
+    alias_method :member?, :has_value?
 
     private
 

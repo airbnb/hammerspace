@@ -306,6 +306,30 @@ describe Hammerspace do
 
       end
 
+      describe "#has_value?" do
+
+        it "returns true when value is present" do
+          hash = Hammerspace.new(path, options)
+          hash['foo'] = 'bar'
+          hash.has_value?('bar').should be_true
+          hash.close
+        end
+
+        it "returns false when value is not present" do
+          hash = Hammerspace.new(path, options)
+          hash['foo'] = 'bar'
+          hash.has_value?('othervalue').should be_false
+          hash.close
+        end
+
+        it "returns false when empty" do
+          hash = Hammerspace.new(path, options)
+          hash.has_value?('foo').should be_false
+          hash.close
+        end
+
+      end
+
       describe "#keys" do
 
         it "returns keys" do
