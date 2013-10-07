@@ -57,6 +57,11 @@ module Hammerspace
         @hash ? @hash.include?(key) : false
       end
 
+      def has_value?(value)
+        each { |k,v| return true if v == value }
+        false
+      end
+
       def keys
         close_logwriter
         open_hash

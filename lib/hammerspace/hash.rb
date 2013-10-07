@@ -21,12 +21,14 @@ module Hammerspace
       :each,
       :empty?,
       :has_key?,
+      :has_value?,
       :keys,
       :size,
       :values
 
     alias_method :key?, :has_key?
     alias_method :include?, :has_key?
+    alias_method :member?, :has_value?
     alias_method :length, :size
 
     DEFAULT_OPTIONS = {
@@ -39,11 +41,6 @@ module Hammerspace
 
       construct_backend
     end
-
-    def has_value?(value)
-      !!find { |k,v| v == value }
-    end
-    alias_method :member?, :has_value?
 
     private
 
