@@ -62,6 +62,10 @@ module Hammerspace
         false
       end
 
+      def merge!(hash)
+        hash.each { |key,value| self[key] = value }
+      end
+
       def keys
         close_logwriter
         open_hash

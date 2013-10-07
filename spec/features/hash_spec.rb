@@ -348,6 +348,25 @@ describe Hammerspace do
 
       end
 
+      describe "#merge!" do
+
+        it "adds new values" do
+          hash = Hammerspace.new(path, options)
+          hash.merge!({'foo' => 'bar'})
+          hash['foo'].should == 'bar'
+          hash.close
+        end
+
+        it "updates existing values" do
+          hash = Hammerspace.new(path, options)
+          hash['foo'] = 'bar'
+          hash.merge!({'foo' => 'newvalue'})
+          hash['foo'].should == 'newvalue'
+          hash.close
+        end
+
+      end
+
       describe "#size" do
 
         it "returns size" do
