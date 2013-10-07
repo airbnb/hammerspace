@@ -15,6 +15,8 @@ module Hammerspace
     # or at least Enumerable
     def_delegators :backend,
       :each,
+      :keys,
+      :values,
       :[],
       :[]=,
       :close

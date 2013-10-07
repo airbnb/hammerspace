@@ -19,6 +19,20 @@ module Hammerspace
         @hash[key]
       end
 
+      def keys
+        close_logwriter
+        open_hash
+
+        @hash.keys
+      end
+
+      def values
+        close_logwriter
+        open_hash
+
+        @hash.values
+      end
+
       def each
         close_logwriter
         open_hash
