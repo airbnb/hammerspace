@@ -11,8 +11,7 @@ module Hammerspace
 
     attr_reader :backend
 
-    # TODO: will need to include all of the methods that ruby's Hash supports,
-    # or at least Enumerable
+    # TODO: include more methods that ruby's Hash supports
     def_delegators :backend,
       :[],
       :[]=,
