@@ -103,4 +103,124 @@ describe Hammerspace::Backend::Sparkey do
     reader2.close
   end
 
+  it "allows iteration with block" do
+    keys = []
+    values = []
+
+    hash = Hammerspace.new(path, options)
+    hash['a'] = 'A'
+    hash['b'] = 'B'
+    hash.each do |key,value|
+      keys << key
+      values << value
+    end
+    hash.close
+
+    keys.should == ['a', 'b']
+    values.should == ['A', 'B']
+  end
+
+  it "allows iteration with enumerator" do
+    keys = []
+    values = []
+
+    hash = Hammerspace.new(path, options)
+    hash['a'] = 'A'
+    hash['b'] = 'B'
+    hash.each.map do |key,value|
+      keys << key
+      values << value
+    end
+    hash.close
+
+    keys.should == ['a', 'b']
+    values.should == ['A', 'B']
+  end
+
+  it "allows updating during iteration with block" do
+    keys = []
+    values = []
+
+    hash = Hammerspace.new(path, options)
+    hash['a'] = 'A'
+    hash['b'] = 'B'
+    hash.each do |key,value|
+      keys << key
+      values << value
+      hash[key] = 'C'
+    end
+
+    keys.should == ['a', 'b']
+    values.should == ['A', 'B']
+
+    hash['a'].should == 'C'
+    hash['b'].should == 'C'
+
+    hash.close
+  end
+
+  it "allows updating during iteration with enumerator" do
+    keys = []
+    values = []
+
+    hash = Hammerspace.new(path, options)
+    hash['a'] = 'A'
+    hash['b'] = 'B'
+    hash.each.map do |key,value|
+      keys << key
+      values << value
+      hash[key] = 'C'
+    end
+
+    keys.should == ['a', 'b']
+    values.should == ['A', 'B']
+
+    hash['a'].should == 'C'
+    hash['b'].should == 'C'
+
+    hash.close
+  end
+
+  it "isolates iterators during iteration with block" do
+    keys = []
+    values = []
+
+    hash = Hammerspace.new(path, options)
+    hash['a'] = 'A'
+    hash['b'] = 'B'
+    hash.each do |key,value|
+      hash['b'] = 'C'
+      keys << key
+      values << value
+    end
+
+    keys.should == ['a', 'b']
+    values.should == ['A', 'B']
+
+    hash['b'].should == 'C'
+
+    hash.close
+  end
+
+  it "isolates iterators during iteration with enumerator" do
+    keys = []
+    values = []
+
+    hash = Hammerspace.new(path, options)
+    hash['a'] = 'A'
+    hash['b'] = 'B'
+    hash.each.map do |key,value|
+      hash['b'] = 'C'
+      keys << key
+      values << value
+    end
+
+    keys.should == ['a', 'b']
+    values.should == ['A', 'B']
+
+    hash['b'].should == 'C'
+
+    hash.close
+  end
+
 end

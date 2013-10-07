@@ -6,7 +6,7 @@ module Hammerspace
     class Sparkey < Base
 
       def []=(key, value)
-        close_hash
+        close_hash_lazy
         open_logwriter
 
         @logwriter[key] = value
@@ -17,6 +17,19 @@ module Hammerspace
         open_hash
 
         @hash[key]
+      end
+
+      def each
+        close_logwriter
+        open_hash
+
+        if block_given?
+          @hash.each { |*args| yield(*args) }
+        else
+          Enumerator.new do |y|
+            @hash.each { |*args| y << args }
+          end
+        end
       end
 
       def close
@@ -54,9 +67,18 @@ module Hammerspace
       end
 
       def open_hash
+        if @reopen_hash
+          close_hash
+          @reopen_hash = false
+        end
+
         @hash ||= begin
           Gnista::Hash.new(hash_path, log_path)
         end
+      end
+
+      def close_hash_lazy
+        @reopen_hash = true
       end
 
       def close_hash
