@@ -14,15 +14,20 @@ module Hammerspace
     # TODO: will need to include all of the methods that ruby's Hash supports,
     # or at least Enumerable
     def_delegators :backend,
-      :[]=,
       :[],
+      :[]=,
+      :close,
+      :delete,
       :each,
-      :keys,
-      :values,
-      :size,
-      :length,
       :empty?,
-      :close
+      :has_key?,
+      :keys,
+      :size,
+      :values
+
+    alias_method :length, :size
+    alias_method :key?, :has_key?
+    alias_method :include?, :has_key?
 
     DEFAULT_OPTIONS = {
       :backend        => Hammerspace::Backend::Sparkey

@@ -4,6 +4,13 @@ module Hammerspace
   module Backend
 
     class Sparkey < Base
+      def [](key)
+        close_logwriter
+        open_hash
+
+        @hash ? @hash[key] : nil
+      end
+
       def []=(key, value)
         close_hash_lazy
         open_logwriter
@@ -11,11 +18,16 @@ module Hammerspace
         @logwriter[key] = value
       end
 
-      def [](key)
+      def close
         close_logwriter
-        open_hash
+        close_hash
+      end
 
-        @hash ? @hash[key] : nil
+      def delete(key)
+        close_hash_lazy
+        open_logwriter
+
+        @logwriter.del(key)
       end
 
       def each
@@ -31,18 +43,25 @@ module Hammerspace
         end
       end
 
+      def empty?
+        close_logwriter
+        open_hash
+
+        @hash ? @hash.empty? : true
+      end
+
+      def has_key?(key)
+        close_logwriter
+        open_hash
+
+        @hash ? @hash.include?(key) : false
+      end
+
       def keys
         close_logwriter
         open_hash
 
         @hash ? @hash.keys : []
-      end
-
-      def values
-        close_logwriter
-        open_hash
-
-        @hash ? @hash.values : []
       end
 
       def size
@@ -52,23 +71,11 @@ module Hammerspace
         @hash ? @hash.size : 0
       end
 
-      def length
+      def values
         close_logwriter
         open_hash
 
-        @hash ? @hash.length : 0
-      end
-
-      def empty?
-        close_logwriter
-        open_hash
-
-        @hash ? @hash.empty? : true
-      end
-
-      def close
-        close_logwriter
-        close_hash
+        @hash ? @hash.values : []
       end
 
       private
