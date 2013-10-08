@@ -30,12 +30,12 @@ module Hammerspace
         @logwriter.del(key)
       end
 
-      def each
+      def each(&block)
         close_logwriter
         open_hash
 
         if block_given?
-          (@hash || []).each { |*args| yield(*args) }
+          (@hash || []).each(&block)
         else
           Enumerator.new do |y|
             (@hash || []).each { |*args| y << args }
