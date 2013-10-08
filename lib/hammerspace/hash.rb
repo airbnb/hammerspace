@@ -41,6 +41,11 @@ module Hammerspace
       @options = DEFAULT_OPTIONS.merge(options)
 
       construct_backend
+
+      if block_given?
+        yield self
+        close
+      end
     end
 
     private

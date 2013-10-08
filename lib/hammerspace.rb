@@ -5,12 +5,11 @@ require 'hammerspace/hash'
 module Hammerspace
 
   def self.new(path, options={})
-    hash = Hash.new(path, options)
     if block_given?
-      yield hash
-      hash.close
+      Hash.new(path, options) { |*args| yield(*args) }
+    else
+      Hash.new(path, options)
     end
-    hash
   end
 
 end

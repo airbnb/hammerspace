@@ -20,6 +20,18 @@ describe Hammerspace::Hash do
     hash.backend.should be_a_kind_of(Hammerspace::Backend::Base)
   end
 
+  it "takes a block" do
+    hash = nil
+    Hammerspace::Hash.new(path) { |h| hash = h }
+
+    hash.should be_an_instance_of(Hammerspace::Hash)
+  end
+
+  it "calls close when given a block" do
+    Hammerspace::Hash.any_instance.should_receive(:close).once.and_call_original
+    Hammerspace::Hash.new(path) {}
+  end
+
   it "supports enumerable" do
     hash = Hammerspace::Hash.new(path, options)
     hash['a'] = 'A'
