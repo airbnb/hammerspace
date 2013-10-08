@@ -4,12 +4,8 @@ require 'hammerspace/hash'
 
 module Hammerspace
 
-  def self.new(path, options={})
-    if block_given?
-      Hash.new(path, options) { |*args| yield(*args) }
-    else
-      Hash.new(path, options)
-    end
+  def self.new(path, options={}, &block)
+    Hash.new(path, options, &block)
   end
 
 end
