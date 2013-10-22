@@ -41,15 +41,17 @@ module Hammerspace
         # TODO: ensure hash.close if iteration is aborted
         hash = open_hash_private
 
+        return block_given? ? nil : Enumerator.new {} unless hash
+
         if block_given?
-          ret = (hash || []).each(&block)
-          hash.close if hash
+          ret = hash.each(&block)
+          hash.close
           ret
         else
           # Gnista does not support each w/o a block; emulate the behavior here.
           Enumerator.new do |y|
-            (hash || []).each { |*args| y << args }
-            hash.close if hash
+            hash.each { |*args| y << args }
+            hash.close
           end
         end
       end
