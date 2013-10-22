@@ -121,6 +121,44 @@ describe Hammerspace do
         reader2.close
       end
 
+      it "supports multiple writers" do
+        writer1 = Hammerspace.new(path, options)
+        writer1['foo'] = 'one'
+
+        writer2 = Hammerspace.new(path, options)
+        writer2['foo'] = 'two'
+        writer2['bar'] = 'two' # test works even without locking if this isn't here?
+
+        writer2.close
+        writer1.close # last write wins
+
+        hash = Hammerspace.new(path, options)
+        hash['foo'].should == 'one'
+        hash['bar'].should be_nil
+        hash.close
+      end
+
+      it "supports multiple appenders" do
+        hash = Hammerspace.new(path, options)
+        hash['foo'] = 'bar'
+        hash.close
+
+        writer1 = Hammerspace.new(path, options)
+        writer1['foo'] = 'one'
+
+        writer2 = Hammerspace.new(path, options)
+        writer2['foo'] = 'two'
+        writer2['bar'] = 'two' # test works even without locking if this isn't here?
+
+        writer2.close
+        writer1.close # last write wins
+
+        hash = Hammerspace.new(path, options)
+        hash['foo'].should == 'one'
+        hash['bar'].should be_nil
+        hash.close
+      end
+
       describe "#each" do
 
         it "allows iteration with block" do

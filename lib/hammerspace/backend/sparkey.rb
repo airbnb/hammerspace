@@ -1,4 +1,5 @@
 require 'gnista'
+require 'securerandom'
 
 module Hammerspace
   module Backend
@@ -105,6 +106,17 @@ module Hammerspace
 
       private
 
+      def tmp_log_path
+        # Ideally we would use Tempfile, but for some reason it was very slow.
+        # (Specs went from taking ~1.5s to ~5s!)
+        File.join(path, "hammerspace.spl.#{SecureRandom.uuid}.tmp")
+      end
+
+      def tmp_hash_path(tmp_log_path)
+        base = File.basename(tmp_log_path).gsub(/^hammerspace\.spl\./, 'hammerspace.spi.')
+        File.join(path, base)
+      end
+
       def log_path
         File.join(path, 'hammerspace.spl')
       end
@@ -115,20 +127,39 @@ module Hammerspace
 
       def open_logwriter
         @logwriter ||= begin
+          # Create a new temporary log file and copy the contents of the
+          # current hash over to it. Writes to this temporary file can happen
+          # independently of all other writers, so no locking is required.
+          # TODO: would FileUtils.cp be faster? but it doesn't compact...
           ensure_path_exists
-          if File.exist?(log_path)
-            Gnista::Logwriter.new(log_path, :append)
-          else
-            Gnista::Logwriter.new(log_path)
-          end
+          logwriter = Gnista::Logwriter.new(tmp_log_path)
+          each { |key,value| logwriter[key] = value }
+          logwriter
         end
       end
 
       def close_logwriter
         if @logwriter
+          tmp_log_path = @logwriter.logpath
+          tmp_hash_path = tmp_hash_path(tmp_log_path)
+
           @logwriter.close
           @logwriter = nil
-          Gnista::Hash.write(hash_path, log_path)
+
+          # Create an index of the temporary log file and write it to a
+          # temporary hash file. Again, this happens independently of all other
+          # writers, so no locking is required.
+          Gnista::Hash.write(tmp_hash_path, tmp_log_path)
+
+          # Promote the temporary hash and log files to the "final" versions
+          # that will be used for reads. This operation is not atomic, so we
+          # need to take an exclusive lock to block other writers and any
+          # readers.
+          lock_for_write do
+            # TODO: handle errors and roll back
+            File.rename(tmp_hash_path, hash_path)
+            File.rename(tmp_log_path, log_path)
+          end
         end
       end
 
@@ -137,9 +168,16 @@ module Hammerspace
       end
 
       def open_hash_private
-        begin
-          Gnista::Hash.new(hash_path, log_path)
-        rescue GnistaException
+        # Take a shared lock before opening files. This avoids a situation
+        # where a writer updates the files after we have opened the hash file
+        # but before we have opened the log file. Once we have open file
+        # descriptors it doesn't matter what happens to the files, so we can
+        # release the lock immediately after opening.
+        lock_for_read do
+          begin
+            Gnista::Hash.new(hash_path, log_path)
+          rescue GnistaException
+          end
         end
       end
 

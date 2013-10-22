@@ -17,6 +17,22 @@ module Hammerspace
         FileUtils.mkdir_p(path)
       end
 
+      def lock_for_write
+        ensure_path_exists
+        File.open(File.join(path, 'hammerspace.lock'), File::CREAT) do |lockfile|
+          lockfile.flock(File::LOCK_EX)
+          yield
+        end
+      end
+
+      def lock_for_read
+        ensure_path_exists
+        File.open(File.join(path, 'hammerspace.lock'), File::CREAT) do |lockfile|
+          lockfile.flock(File::LOCK_SH)
+          yield
+        end
+      end
+
     end
 
   end
