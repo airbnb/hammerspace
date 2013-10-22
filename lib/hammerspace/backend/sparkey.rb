@@ -37,21 +37,24 @@ module Hammerspace
         # Further, Gnista segfaults if the hash is closed during iteration (e.g.,
         # from interleaved reads and writes), so a private copy ensures that
         # the hash is only closed once iteration is complete.
-        #
-        # TODO: ensure hash.close if iteration is aborted
         hash = open_hash_private
 
         return block_given? ? nil : Enumerator.new {} unless hash
 
         if block_given?
-          ret = hash.each(&block)
-          hash.close
-          ret
+          begin
+            hash.each(&block)
+          ensure
+            hash.close
+          end
         else
           # Gnista does not support each w/o a block; emulate the behavior here.
           Enumerator.new do |y|
-            hash.each { |*args| y << args }
-            hash.close
+            begin
+              hash.each { |*args| y << args }
+            ensure
+              hash.close
+            end
           end
         end
       end
