@@ -12,7 +12,7 @@ module Hammerspace
       end
 
       def []=(key, value)
-        close_hash_lazy
+        close_hash
         open_logwriter
 
         @logwriter[key] = value
@@ -24,7 +24,7 @@ module Hammerspace
       end
 
       def delete(key)
-        close_hash_lazy
+        close_hash
         open_logwriter
 
         @logwriter.del(key)
@@ -32,13 +32,24 @@ module Hammerspace
 
       def each(&block)
         close_logwriter
-        open_hash
+
+        # Open a private copy of the hash to ensure isolation during iteration.
+        # Further, Gnista segfaults if the hash is closed during iteration (e.g.,
+        # from interleaved reads and writes), so a private copy ensures that
+        # the hash is only closed once iteration is complete.
+        #
+        # TODO: ensure hash.close if iteration is aborted
+        hash = open_hash_private
 
         if block_given?
-          (@hash || []).each(&block)
+          ret = (hash || []).each(&block)
+          hash.close if hash
+          ret
         else
+          # Gnista does not support each w/o a block; emulate the behavior here.
           Enumerator.new do |y|
-            (@hash || []).each { |*args| y << args }
+            (hash || []).each { |*args| y << args }
+            hash.close if hash
           end
         end
       end
@@ -117,21 +128,14 @@ module Hammerspace
       end
 
       def open_hash
-        if @reopen_hash
-          close_hash
-          @reopen_hash = false
-        end
-
-        @hash ||= begin
-          begin
-            Gnista::Hash.new(hash_path, log_path)
-          rescue GnistaException
-          end
-        end
+        @hash ||= open_hash_private
       end
 
-      def close_hash_lazy
-        @reopen_hash = true
+      def open_hash_private
+        begin
+          Gnista::Hash.new(hash_path, log_path)
+        rescue GnistaException
+        end
       end
 
       def close_hash
