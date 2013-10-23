@@ -51,7 +51,7 @@ module Hammerspace
           begin
             hash.each(&block)
           ensure
-            hash.close
+            close_hash_private(hash)
           end
         else
           # Gnista does not support each w/o a block; emulate the behavior here.
@@ -59,7 +59,7 @@ module Hammerspace
             begin
               hash.each { |*args| y << args }
             ensure
-              hash.close
+              close_hash_private(hash)
             end
           end
         end
@@ -153,7 +153,9 @@ module Hammerspace
           end
 
           # If there was an existing "current" symlink, the directory it
-          # pointed to is now obsolete. Remove it and its contents.
+          # pointed to is now obsolete. Remove it and its contents. Note that
+          # the directory itself cannot be removed if the files within are still
+          # open.
           FileUtils.rm_rf(File.join(path, old_path), :secure => true) if old_path
         end
       end
@@ -170,7 +172,7 @@ module Hammerspace
         # Remove the "current" symlink if it exists. Only one process should
         # do this at a time, and no readers should try to open files while
         # this is happening, so we need to take an exclusive lock for this
-        # operation.  While we are holding the lock, note the old target of
+        # operation. While we are holding the lock, note the old target of
         # the "current" symlink if it exists.
         old_path = nil
         lock_for_write do
@@ -181,7 +183,9 @@ module Hammerspace
         end
 
         # If there was an existing "current" symlink, the directory it
-        # pointed to is now obsolete. Remove it and its contents.
+        # pointed to is now obsolete. Remove it and its contents. Note that
+        # the directory itself cannot be removed if the files within are still
+        # open.
         FileUtils.rm_rf(File.join(path, old_path), :secure => true) if old_path
       end
 
@@ -204,9 +208,20 @@ module Hammerspace
       end
 
       def close_hash
-        if @hash
-          @hash.close
-          @hash = nil
+        close_hash_private(@hash)
+        @hash = nil
+      end
+
+      def close_hash_private(hash)
+        if hash
+          hash.close
+
+          # If the parent directory of the files we just closed is now empty,
+          # we were the last reader. Removed the obsolete directory.
+          begin
+            Dir.rmdir(File.dirname(hash.hashpath))
+          rescue Errno::ENOTEMPTY
+          end
         end
       end
 
@@ -230,12 +245,18 @@ module Hammerspace
         File.join(path, 'current')
       end
 
+      def cur_path_target
+        # If the "current" symlink exists, resolve it now so the path will be
+        # valid even if a writer changes it later.
+        File.symlink?(cur_path) ? File.join(path, File.readlink(cur_path)) : cur_path
+      end
+
       def cur_log_path
-        File.join(cur_path, 'hammerspace.spl')
+        File.join(cur_path_target, 'hammerspace.spl')
       end
 
       def cur_hash_path
-        File.join(cur_path, 'hammerspace.spi')
+        File.join(cur_path_target, 'hammerspace.spi')
       end
 
     end

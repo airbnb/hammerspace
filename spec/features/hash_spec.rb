@@ -188,6 +188,37 @@ describe Hammerspace do
 
       end
 
+      describe "#close" do
+
+        it "removes empty directories" do
+          writer1 = Hammerspace.new(path, options)
+          writer1['foo'] = 'bar'
+          writer1.close
+
+          reader = Hammerspace.new(path, options)
+          reader['foo'].should == 'bar'
+
+          writer2 = Hammerspace.new(path, options)
+          writer2['foo'] = 'bar'
+          writer2.close # cleanup fails since reader has open fds
+
+          dirs = 0
+          Dir.glob(File.join(path, '*')) do |f|
+            dirs += 1 if File.directory?(f) && !File.symlink?(f)
+          end
+          dirs.should == 2
+
+          reader.close
+
+          dirs = 0
+          Dir.glob(File.join(path, '*')) do |f|
+            dirs += 1 if File.directory?(f) && !File.symlink?(f)
+          end
+          dirs.should == 1
+        end
+
+      end
+
       describe "#each" do
 
         it "allows iteration with block" do
@@ -374,6 +405,60 @@ describe Hammerspace do
           hash['b'].should == 'C'
 
           hash.close
+        end
+
+        it "removes empty directories after iteration with block" do
+          writer1 = Hammerspace.new(path, options)
+          writer1['foo'] = 'bar'
+          writer1.close
+
+          reader = Hammerspace.new(path, options)
+          reader.each do |key,value|
+            writer2 = Hammerspace.new(path, options)
+            writer2['foo'] = 'bar'
+            writer2.close # cleanup fails since reader has open fds
+
+            dirs = 0
+            Dir.glob(File.join(path, '*')) do |f|
+              dirs += 1 if File.directory?(f) && !File.symlink?(f)
+            end
+            dirs.should == 2
+          end
+
+          dirs = 0
+          Dir.glob(File.join(path, '*')) do |f|
+            dirs += 1 if File.directory?(f) && !File.symlink?(f)
+          end
+          dirs.should == 1
+
+          reader.close
+        end
+
+        it "removes empty directories after iteration with enumerator" do
+          writer1 = Hammerspace.new(path, options)
+          writer1['foo'] = 'bar'
+          writer1.close
+
+          reader = Hammerspace.new(path, options)
+          reader.each.map do |key,value|
+            writer2 = Hammerspace.new(path, options)
+            writer2['foo'] = 'bar'
+            writer2.close # cleanup fails since reader has open fds
+
+            dirs = 0
+            Dir.glob(File.join(path, '*')) do |f|
+              dirs += 1 if File.directory?(f) && !File.symlink?(f)
+            end
+            dirs.should == 2
+          end
+
+          dirs = 0
+          Dir.glob(File.join(path, '*')) do |f|
+            dirs += 1 if File.directory?(f) && !File.symlink?(f)
+          end
+          dirs.should == 1
+
+          reader.close
         end
 
       end
