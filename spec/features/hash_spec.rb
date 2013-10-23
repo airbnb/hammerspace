@@ -159,6 +159,10 @@ describe Hammerspace do
         hash.close
       end
 
+      it "handles high write concurrency" do
+        run_write_concurrency_test(path, options)
+      end
+
       describe "#clear" do
 
         it "removes all keys and values" do

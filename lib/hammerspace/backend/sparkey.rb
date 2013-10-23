@@ -154,7 +154,7 @@ module Hammerspace
 
           # If there was an existing "current" symlink, the directory it
           # pointed to is now obsolete. Remove it and its contents.
-          FileUtils.rm_rf(old_path, :secure => true) if old_path
+          FileUtils.rm_rf(File.join(path, old_path), :secure => true) if old_path
         end
       end
 
@@ -182,7 +182,7 @@ module Hammerspace
 
         # If there was an existing "current" symlink, the directory it
         # pointed to is now obsolete. Remove it and its contents.
-        FileUtils.rm_rf(old_path, :secure => true) if old_path
+        FileUtils.rm_rf(File.join(path, old_path), :secure => true) if old_path
       end
 
       def open_hash
