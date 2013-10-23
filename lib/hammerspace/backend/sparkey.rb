@@ -250,7 +250,7 @@ module Hammerspace
       end
 
       def regenerate_uid
-        @uid = SecureRandom.uuid
+        @uid = "#{Process.pid}_#{SecureRandom.uuid}"
       end
 
       def new_path
