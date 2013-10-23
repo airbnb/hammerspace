@@ -39,6 +39,33 @@ describe Hammerspace::Backend::Sparkey do
     SparkeyDirectoryHelper.has_unknown_files?(path).should be_false
   end
 
+  describe "#check_fs" do
+
+    it "should call check methods" do
+      Hammerspace::Backend::Sparkey.any_instance.should_receive(:flock_works?).once.and_call_original
+      Hammerspace::Backend::Sparkey.any_instance.should_receive(:dir_cleanup_works?).once.and_call_original
+
+      Hammerspace.new(path, options)
+    end
+
+  end
+
+  describe "#flock_works?" do
+
+    it "should check flock and return true" do
+      Hammerspace.new(path, options).backend.flock_works?.should be_true
+    end
+
+  end
+
+  describe "#dir_cleanup_works?" do
+
+    it "should check directory cleanup and return true" do
+      Hammerspace.new(path, options).backend.dir_cleanup_works?.should be_true
+    end
+
+  end
+
   describe "#clear" do
 
     it "removes all keys and values and cleans up" do

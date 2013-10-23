@@ -5,6 +5,45 @@ module Hammerspace
   module Backend
 
     class Sparkey < Base
+
+      def check_fs
+        super
+        warn_dir_cleanup unless dir_cleanup_works?
+      end
+
+      def dir_cleanup_works?
+        dir_cleanup_works = false
+        ensure_path_exists(path)
+        begin
+          Dir.mktmpdir('dir_cleanup_works.', path) do |tmpdir|
+            test       = File.join(tmpdir, 'test')
+            test_tmp   = File.join(tmpdir, 'test.tmp')
+            test_file  = File.join(test, 'file')
+            test1      = File.join(tmpdir, 'test.1')
+            test1_file = File.join(test1, 'file')
+            test2      = File.join(tmpdir, 'test.2')
+            test2_file = File.join(test2, 'file')
+
+            Dir.mkdir(test1)
+            FileUtils.touch(test1_file)
+            File.symlink(File.basename(test1), test)
+
+            File.open(test_file) do
+              Dir.mkdir(test2)
+              FileUtils.touch(test2_file)
+              File.symlink(File.basename(test2), test_tmp)
+              File.rename(test_tmp, test)
+
+              FileUtils.rm_rf(test1, :secure => true)
+
+              dir_cleanup_works = File.directory?(test1) == false
+            end
+          end
+        rescue
+        end
+        dir_cleanup_works
+      end
+
       def [](key)
         close_logwriter
         open_hash
@@ -236,6 +275,11 @@ module Hammerspace
 
       def cur_hash_path
         File.join(cur_path, 'hammerspace.spi')
+      end
+
+      def warn_dir_cleanup
+        warn "#{self.class}: Warning: filesystem does not appear to allow removing directories " \
+             "when files within are still in use. Directory cleanup may not behave as expected.".red
       end
 
     end
