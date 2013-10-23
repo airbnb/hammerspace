@@ -82,9 +82,9 @@ describe Hammerspace::Backend::Sparkey do
 
       writer2 = Hammerspace.new(path, options)
       writer2['foo'] = 'bar'
-      writer2.close # cleanup fails since reader has open fds
+      writer2.close
 
-      SparkeyDirectoryHelper.directory_count(path).should == 2
+      SparkeyDirectoryHelper.directory_count(path).should == 1
 
       reader.close
 
@@ -104,9 +104,9 @@ describe Hammerspace::Backend::Sparkey do
       reader.each do |key,value|
         writer2 = Hammerspace.new(path, options)
         writer2['foo'] = 'bar'
-        writer2.close # cleanup fails since reader has open fds
+        writer2.close
 
-        SparkeyDirectoryHelper.directory_count(path).should == 2
+        SparkeyDirectoryHelper.directory_count(path).should == 1
       end
 
       SparkeyDirectoryHelper.directory_count(path).should == 1
@@ -123,9 +123,9 @@ describe Hammerspace::Backend::Sparkey do
       reader.each.map do |key,value|
         writer2 = Hammerspace.new(path, options)
         writer2['foo'] = 'bar'
-        writer2.close # cleanup fails since reader has open fds
+        writer2.close
 
-        SparkeyDirectoryHelper.directory_count(path).should == 2
+        SparkeyDirectoryHelper.directory_count(path).should == 1
       end
 
       SparkeyDirectoryHelper.directory_count(path).should == 1
