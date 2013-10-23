@@ -106,33 +106,15 @@ module Hammerspace
 
       private
 
-      def tmp_log_path
-        # Ideally we would use Tempfile, but for some reason it was very slow.
-        # (Specs went from taking ~1.5s to ~5s!)
-        File.join(path, "hammerspace.spl.#{SecureRandom.uuid}.tmp")
-      end
-
-      def tmp_hash_path(tmp_log_path)
-        base = File.basename(tmp_log_path).gsub(/^hammerspace\.spl\./, 'hammerspace.spi.')
-        File.join(path, base)
-      end
-
-      def log_path
-        File.join(path, 'hammerspace.spl')
-      end
-
-      def hash_path
-        File.join(path, 'hammerspace.spi')
-      end
-
       def open_logwriter
         @logwriter ||= begin
-          # Create a new temporary log file and copy the contents of the
-          # current hash over to it. Writes to this temporary file can happen
-          # independently of all other writers, so no locking is required.
-          # TODO: would FileUtils.cp be faster? but it doesn't compact...
-          ensure_path_exists
-          logwriter = Gnista::Logwriter.new(tmp_log_path)
+          # Create a new log file in a new, private directory and copy the
+          # contents of the current hash over to it. Writes to this new file
+          # can happen independently of all other writers, so no locking is
+          # required.
+          regenerate_uid
+          ensure_path_exists(new_path)
+          logwriter = Gnista::Logwriter.new(new_log_path)
           each { |key,value| logwriter[key] = value }
           logwriter
         end
@@ -140,26 +122,34 @@ module Hammerspace
 
       def close_logwriter
         if @logwriter
-          tmp_log_path = @logwriter.logpath
-          tmp_hash_path = tmp_hash_path(tmp_log_path)
-
           @logwriter.close
           @logwriter = nil
 
-          # Create an index of the temporary log file and write it to a
-          # temporary hash file. Again, this happens independently of all other
-          # writers, so no locking is required.
-          Gnista::Hash.write(tmp_hash_path, tmp_log_path)
+          # Create an index of the log file and write it to a hash file in the
+          # same private directory. Again, this happens independently of all
+          # other writers, so no locking is required.
+          Gnista::Hash.write(new_hash_path, new_log_path)
 
-          # Promote the temporary hash and log files to the "final" versions
-          # that will be used for reads. This operation is not atomic, so we
-          # need to take an exclusive lock to block other writers and any
-          # readers.
+          # Create a symlink pointed at the private directory. Give the symlink
+          # a temporary name for now. Note that the target of the symlink is
+          # the raw uid, not a full path, since symlink targets are relative.
+          File.symlink(@uid, "#{new_path}.tmp")
+
+          # Rename the symlink pointed at the new directory to "current", which
+          # atomically promotes the new directory to be the current directory.
+          # Only one process should do this at a time, and no readers should
+          # try to open files while this is happening, so we need to take an
+          # exclusive lock for this operation. While we are holding the lock,
+          # note the old target of the "current" symlink, if it exists.
+          old_path = nil
           lock_for_write do
-            # TODO: handle errors and roll back
-            File.rename(tmp_hash_path, hash_path)
-            File.rename(tmp_log_path, log_path)
+            old_path = File.readlink(cur_path) if File.symlink?(cur_path)
+            File.rename("#{new_path}.tmp", cur_path)
           end
+
+          # If there was an existing "current" symlink, the directory it
+          # pointed to is now obsolete. Remove it and its contents.
+          FileUtils.rm_rf(old_path, :secure => true) if old_path
         end
       end
 
@@ -175,7 +165,7 @@ module Hammerspace
         # release the lock immediately after opening.
         lock_for_read do
           begin
-            Gnista::Hash.new(hash_path, log_path)
+            Gnista::Hash.new(cur_hash_path, cur_log_path)
           rescue GnistaException
           end
         end
@@ -186,6 +176,34 @@ module Hammerspace
           @hash.close
           @hash = nil
         end
+      end
+
+      def regenerate_uid
+        @uid = SecureRandom.uuid
+      end
+
+      def new_path
+        File.join(path, @uid)
+      end
+
+      def new_log_path
+        File.join(new_path, 'hammerspace.spl')
+      end
+
+      def new_hash_path
+        File.join(new_path, 'hammerspace.spi')
+      end
+
+      def cur_path
+        File.join(path, 'current')
+      end
+
+      def cur_log_path
+        File.join(cur_path, 'hammerspace.spl')
+      end
+
+      def cur_hash_path
+        File.join(cur_path, 'hammerspace.spi')
       end
 
     end

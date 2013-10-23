@@ -13,12 +13,12 @@ module Hammerspace
 
       protected
 
-      def ensure_path_exists
+      def ensure_path_exists(path)
         FileUtils.mkdir_p(path)
       end
 
       def lock_for_write
-        ensure_path_exists
+        ensure_path_exists(path)
         File.open(File.join(path, 'hammerspace.lock'), File::CREAT) do |lockfile|
           lockfile.flock(File::LOCK_EX)
           yield
@@ -26,7 +26,7 @@ module Hammerspace
       end
 
       def lock_for_read
-        ensure_path_exists
+        ensure_path_exists(path)
         File.open(File.join(path, 'hammerspace.lock'), File::CREAT) do |lockfile|
           lockfile.flock(File::LOCK_SH)
           yield
