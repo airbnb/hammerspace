@@ -15,6 +15,7 @@ module Hammerspace
     def_delegators :backend,
       :[],
       :[]=,
+      :clear,
       :close,
       :delete,
       :each,

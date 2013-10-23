@@ -159,6 +159,31 @@ describe Hammerspace do
         hash.close
       end
 
+      describe "#clear" do
+
+        it "removes all keys and values" do
+          hash = Hammerspace.new(path, options)
+          hash['foo'] = 'bar'
+          hash.close
+
+          hash = Hammerspace.new(path, options)
+          hash.clear
+          hash['foo'].should be_nil
+          hash.size.should == 0
+          hash.close
+        end
+
+        it "removes unflushed keys and values" do
+          hash = Hammerspace.new(path, options)
+          hash['foo'] = 'bar'
+          hash.clear
+          hash['foo'].should be_nil
+          hash.size.should == 0
+          hash.close
+        end
+
+      end
+
       describe "#each" do
 
         it "allows iteration with block" do

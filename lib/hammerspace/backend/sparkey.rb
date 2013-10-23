@@ -19,6 +19,11 @@ module Hammerspace
         @logwriter[key] = value
       end
 
+      def clear
+        close_hash
+        close_logwriter_clear
+      end
+
       def close
         close_logwriter
         close_hash
@@ -140,7 +145,7 @@ module Hammerspace
           # Only one process should do this at a time, and no readers should
           # try to open files while this is happening, so we need to take an
           # exclusive lock for this operation. While we are holding the lock,
-          # note the old target of the "current" symlink, if it exists.
+          # note the old target of the "current" symlink if it exists.
           old_path = nil
           lock_for_write do
             old_path = File.readlink(cur_path) if File.symlink?(cur_path)
@@ -151,6 +156,33 @@ module Hammerspace
           # pointed to is now obsolete. Remove it and its contents.
           FileUtils.rm_rf(old_path, :secure => true) if old_path
         end
+      end
+
+      def close_logwriter_clear
+        if @logwriter
+          @logwriter.close
+          @logwriter = nil
+
+          # Delete the private directory and the new log file inside it.
+          FileUtils.rm_rf(new_path, :secure => true)
+        end
+
+        # Remove the "current" symlink if it exists. Only one process should
+        # do this at a time, and no readers should try to open files while
+        # this is happening, so we need to take an exclusive lock for this
+        # operation.  While we are holding the lock, note the old target of
+        # the "current" symlink if it exists.
+        old_path = nil
+        lock_for_write do
+          if File.symlink?(cur_path)
+            old_path = File.readlink(cur_path)
+            File.unlink(cur_path)
+          end
+        end
+
+        # If there was an existing "current" symlink, the directory it
+        # pointed to is now obsolete. Remove it and its contents.
+        FileUtils.rm_rf(old_path, :secure => true) if old_path
       end
 
       def open_hash
