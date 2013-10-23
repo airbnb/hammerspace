@@ -1,4 +1,5 @@
 require 'gnista'
+require 'fileutils'
 require 'securerandom'
 
 module Hammerspace
