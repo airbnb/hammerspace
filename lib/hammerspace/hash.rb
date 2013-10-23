@@ -34,7 +34,7 @@ module Hammerspace
     alias_method :length, :size
 
     DEFAULT_OPTIONS = {
-      :backend        => Hammerspace::Backend::Sparkey
+      :backend => Hammerspace::Backend::Sparkey
     }
 
     def initialize(path, options={})

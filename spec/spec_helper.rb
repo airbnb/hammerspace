@@ -13,6 +13,7 @@ end
 
 require 'hammerspace'
 
+require 'support/sparkey_directory_helper'
 require 'support/write_concurrency_test'
 
 RSpec.configure do |config|
