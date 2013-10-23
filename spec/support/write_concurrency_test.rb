@@ -22,7 +22,8 @@ module WriteConcurrencyTest
 
     iterations.times do
       hash = Hammerspace.new(path, options)
-      raise "hash.size == #{hash.size}, expected #{size}" unless hash.size == size
+      hash_size = hash.size
+      raise "hash.size == #{hash_size}, expected #{size}" unless hash_size == size
       size.times do |i|
         unless hash[i.to_s] == hash['0']
           raise "hash[#{i.to_s}] == #{hash[i.to_s]}, expected #{hash['0']}"

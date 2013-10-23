@@ -217,10 +217,10 @@ module Hammerspace
           hash.close
 
           # If the parent directory of the files we just closed is now empty,
-          # we were the last reader. Removed the obsolete directory.
+          # we were the last reader. Remove the obsolete directory.
           begin
             Dir.rmdir(File.dirname(hash.hashpath))
-          rescue Errno::ENOTEMPTY
+          rescue
           end
         end
       end
