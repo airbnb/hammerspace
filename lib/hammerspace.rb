@@ -1,3 +1,5 @@
+require 'colored'
+
 require 'hammerspace/version'
 require 'hammerspace/backend'
 require 'hammerspace/hash'

@@ -16,14 +16,6 @@ describe Hammerspace do
         FileUtils.rm_rf(path, :secure => true)
       end
 
-      it "creates path on set" do
-        hash = Hammerspace.new(path, options)
-        hash['foo'] = 'bar'
-        hash.close
-
-        Dir.exist?(path).should be_true
-      end
-
       it "gets after set" do
         hash = Hammerspace.new(path, options)
         hash['foo'] = 'bar'
@@ -52,15 +44,6 @@ describe Hammerspace do
         hash['foo'].should == 'bar'
         hash['foo'] = 'newvalue'
         hash['foo'].should == 'newvalue'
-        hash.close
-      end
-
-      it "bulks writes" do
-        Gnista::Hash.should_receive(:write).once.and_call_original
-
-        hash = Hammerspace.new(path, options)
-        hash['foo'] = 'bar'
-        hash['foo'] = 'newvalue'
         hash.close
       end
 
@@ -119,6 +102,73 @@ describe Hammerspace do
 
         reader1.close
         reader2.close
+      end
+
+      it "supports multiple writers" do
+        writer1 = Hammerspace.new(path, options)
+        writer1['foo'] = 'one'
+
+        writer2 = Hammerspace.new(path, options)
+        writer2['foo'] = 'two'
+        writer2['bar'] = 'two' # test works even without locking if this isn't here?
+
+        writer2.close
+        writer1.close # last write wins
+
+        hash = Hammerspace.new(path, options)
+        hash['foo'].should == 'one'
+        hash['bar'].should be_nil
+        hash.close
+      end
+
+      it "supports multiple appenders" do
+        hash = Hammerspace.new(path, options)
+        hash['foo'] = 'bar'
+        hash.close
+
+        writer1 = Hammerspace.new(path, options)
+        writer1['foo'] = 'one'
+
+        writer2 = Hammerspace.new(path, options)
+        writer2['foo'] = 'two'
+        writer2['bar'] = 'two' # test works even without locking if this isn't here?
+
+        writer2.close
+        writer1.close # last write wins
+
+        hash = Hammerspace.new(path, options)
+        hash['foo'].should == 'one'
+        hash['bar'].should be_nil
+        hash.close
+      end
+
+      it "handles high write concurrency" do
+        run_write_concurrency_test(path, options)
+      end
+
+      describe "#clear" do
+
+        it "removes all keys and values" do
+          hash = Hammerspace.new(path, options)
+          hash['foo'] = 'bar'
+          hash.close
+
+          hash = Hammerspace.new(path, options)
+          hash.clear
+          hash['foo'].should be_nil
+          hash.size.should == 0
+          hash.close
+        end
+
+        it "removes unflushed keys and values" do
+          hash = Hammerspace.new(path, options)
+          hash['foo'] = 'bar'
+          hash.clear
+          hash['foo'].should be_nil
+          hash.size.should == 0
+          hash.close
+        end
+
       end
 
       describe "#each" do
