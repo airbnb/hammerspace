@@ -1,12 +1,13 @@
 module WriteConcurrencyTest
 
-  # Initialize n hashes (of joyful nonsense), fork one process for each. Have them
-  # madly write their hash, and flush (repeat many, many times). Now join on their
-  # timely demise. Read from the resulting hammerspace, it should contain one of
-  # the n original hashes. Though which one I shall never tell. Also, at the
-  # end of the test, there should be one directory and one symlink.
+  # Initialize n hashes (of joyful nonsense), fork one process for each. Have
+  # them madly write their hash, and flush (repeat many, many times). While
+  # this is happening, read from the hammerspace. It should contain one of the
+  # n original hashes. Though which one I shall never tell. Also, at the end of
+  # the test, there should be one directory and one symlink.
   def run_write_concurrency_test(path, options, concurrency = 10, iterations = 10, size = 10)
     pids = []
+
     concurrency.times do |id|
       pids << fork do
         iterations.times do
@@ -17,16 +18,21 @@ module WriteConcurrencyTest
       end
     end
 
-    pids.each { |pid| Process.wait(pid) }
+    # Wait for first hash to be written
+    sleep(0.5)
 
-    hash = Hammerspace.new(path, options)
-    raise "hash.size == #{hash.size}, expected #{size}" unless hash.size == size
-    size.times do |i|
-      unless hash[i.to_s] == hash['0']
-        raise "hash[#{i.to_s}] == #{hash[i.to_s]}, expected #{hash['0']}"
+    iterations.times do
+      hash = Hammerspace.new(path, options)
+      raise "hash.size == #{hash.size}, expected #{size}" unless hash.size == size
+      size.times do |i|
+        unless hash[i.to_s] == hash['0']
+          raise "hash[#{i.to_s}] == #{hash[i.to_s]}, expected #{hash['0']}"
+        end
       end
+      hash.close
     end
-    hash.close
+
+    pids.each { |pid| Process.wait(pid) }
 
     current_exists = false
     dirs = []
