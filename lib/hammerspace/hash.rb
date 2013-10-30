@@ -24,6 +24,7 @@ module Hammerspace
       :has_value?,
       :merge!,
       :keys,
+      :replace,
       :size,
       :values
 
@@ -31,6 +32,7 @@ module Hammerspace
     alias_method :include?, :has_key?
     alias_method :member?, :has_value?
     alias_method :update, :merge!
+    alias_method :initialize_copy, :replace
     alias_method :length, :size
 
     DEFAULT_OPTIONS = {

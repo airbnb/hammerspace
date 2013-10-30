@@ -463,6 +463,31 @@ describe Hammerspace do
 
       end
 
+      describe "#replace" do
+
+        it "removes values" do
+          hash = Hammerspace.new(path, options)
+          hash['a'] = 'A'
+          hash.close
+
+          hash.replace({'b' => 'B'})
+          hash['a'].should be_nil
+          hash['b'].should == 'B'
+          hash.close
+        end
+
+        it "updates existing values" do
+          hash = Hammerspace.new(path, options)
+          hash['foo'] = 'bar'
+          hash.close
+
+          hash.replace({'foo' => 'newvalue'})
+          hash['foo'].should == 'newvalue'
+          hash.close
+        end
+
+      end
+
       describe "#size" do
 
         it "returns size" do

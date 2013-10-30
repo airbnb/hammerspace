@@ -135,6 +135,13 @@ module Hammerspace
         @hash ? @hash.keys : []
       end
 
+      def replace(hash)
+        close_hash
+        open_logwriter_replace
+
+        merge!(hash)
+      end
+
       def size
         close_logwriter
         open_hash
@@ -162,6 +169,17 @@ module Hammerspace
           logwriter = Gnista::Logwriter.new(new_log_path)
           each { |key,value| logwriter[key] = value }
           logwriter
+        end
+      end
+
+      def open_logwriter_replace
+        @logwriter ||= begin
+          # Create a new log file in a new, private directory.  Writes to this
+          # new file can happen independently of all other writers, so no
+          # locking is required.
+          regenerate_uid
+          ensure_path_exists(new_path)
+          Gnista::Logwriter.new(new_log_path)
         end
       end
 
