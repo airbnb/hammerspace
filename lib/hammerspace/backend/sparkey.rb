@@ -63,6 +63,8 @@ module Hammerspace
       def clear
         close_hash
         close_logwriter_clear
+
+        @frontend
       end
 
       def close
@@ -70,6 +72,8 @@ module Hammerspace
         close_hash
       end
 
+      # TODO: This currently always returns nil. If the key is not found,
+      # return the default value. Also, support block usage.
       def delete(key)
         close_hash
         open_logwriter
@@ -94,6 +98,7 @@ module Hammerspace
           ensure
             hash.close
           end
+          @frontend
         else
           # Gnista does not support each w/o a block; emulate the behavior here.
           Enumerator.new do |y|
@@ -124,8 +129,11 @@ module Hammerspace
         !!@frontend.find { |k,v| v == value }
       end
 
+      # TODO: Support block usage.
       def merge!(hash)
         hash.each { |key,value| self[key] = value }
+
+        @frontend
       end
 
       def keys

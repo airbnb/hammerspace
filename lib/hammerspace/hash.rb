@@ -40,6 +40,7 @@ module Hammerspace
       :backend => Hammerspace::Backend::Sparkey
     }
 
+    # TODO: support setting default value
     def initialize(path, options={}, &block)
       @path    = path
       @options = DEFAULT_OPTIONS.merge(options)

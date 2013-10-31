@@ -161,6 +161,25 @@ describe Hammerspace do
           hash['foo'].should == 'default'
         end
 
+        it "supports storing the default value" do
+          hash = Hammerspace.new(path, options) { |h,k| h[k] = 'Go fish' }
+          hash['foo'].should == 'Go fish'
+          hash.include?('foo').should be_true
+        end
+
+      end
+
+      describe "#[]=" do
+
+        it "handles key mutation" do
+          hash = Hammerspace.new(path, options)
+          key = 'foo'
+          hash[key] = 'bar'
+          key = 'key'
+          hash['foo'].should == 'bar'
+          hash['key'].should be_nil
+        end
+
       end
 
       describe "#clear" do
