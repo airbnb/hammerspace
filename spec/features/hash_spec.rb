@@ -497,6 +497,14 @@ describe Hammerspace do
           hash.close
         end
 
+        it "calls block on duplicates to determine value" do
+          hash = Hammerspace.new(path, options)
+          hash['foo'] = 'bar'
+          hash.merge!({'foo' => 'newvalue'}) { |key, v1, v2| v1 + v2 }
+          hash['foo'].should == 'barnewvalue'
+          hash.close
+        end
+
       end
 
       describe "#replace" do

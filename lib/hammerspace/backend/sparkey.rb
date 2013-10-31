@@ -129,9 +129,14 @@ module Hammerspace
         !!@frontend.find { |k,v| v == value }
       end
 
-      # TODO: Support block usage.
       def merge!(hash)
-        hash.each { |key,value| self[key] = value }
+        hash.each do |key,value|
+          if block_given?
+            self[key] = yield key, self[key], value
+          else
+            self[key] = value
+          end
+        end
 
         @frontend
       end
