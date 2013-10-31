@@ -207,11 +207,6 @@ module Hammerspace
         @frontend.each_with_object({}) { |args, hash| hash[args.first] = args.last }
       end
 
-      def to_s
-        # Not terribly efficient, but hopefully only used in development.
-        to_hash.to_s
-      end
-
       def values
         close_logwriter
         open_hash

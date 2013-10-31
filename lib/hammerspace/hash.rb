@@ -31,7 +31,6 @@ module Hammerspace
       :size,
       :to_a,
       :to_hash,
-      :to_s,
       :values,
       :values_at
 

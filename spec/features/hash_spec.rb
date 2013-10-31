@@ -679,24 +679,6 @@ describe Hammerspace do
 
       end
 
-      describe "#to_s" do
-
-        it "returns a string" do
-          hash = Hammerspace.new(path, options)
-          hash['a'] = 'A'
-          hash['b'] = 'B'
-          hash.to_s.should == '{"a"=>"A", "b"=>"B"}'
-          hash.close
-        end
-
-        it "returns a string when empty" do
-          hash = Hammerspace.new(path, options)
-          hash.to_s.should == '{}'
-          hash.close
-        end
-
-      end
-
       describe "#values" do
 
         it "returns values" do
