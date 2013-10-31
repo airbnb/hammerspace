@@ -11,6 +11,8 @@ module Hammerspace
 
     attr_reader :backend
 
+    attr_reader :default_proc
+
     # TODO: include more methods that ruby's Hash supports
     def_delegators :backend,
       :[],
@@ -40,16 +42,31 @@ module Hammerspace
       :backend => Hammerspace::Backend::Sparkey
     }
 
-    def initialize(path, options={})
+    def initialize(path, options={}, &block)
       @path    = path
       @options = DEFAULT_OPTIONS.merge(options)
 
-      construct_backend
+      self.default_proc=(block) if block_given?
 
-      if block_given?
-        yield self
-        close
+      construct_backend
+    end
+
+    def default(*args)
+      if @default_proc && args.size
+        @default_proc.call(self, args.first)
+      else
+        @default
       end
+    end
+
+    def default=(value)
+      @default_proc = nil
+      @default = value
+    end
+
+    def default_proc=(value)
+      @default = nil
+      @default_proc = value
     end
 
     private

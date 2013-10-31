@@ -3,19 +3,20 @@ require 'spec_helper'
 describe Hammerspace do
 
   let(:path) { 'tmp' }
+  let(:options) { {} }
 
-  it "returns a Hammerspace::Hash object" do
-    hash = Hammerspace.new(path)
-    hash.close
+  describe "#initialize" do
 
-    hash.should be_an_instance_of(Hammerspace::Hash)
-  end
+    it "returns a Hammerspace::Hash object" do
+      hash = Hammerspace.new(path, options)
+      hash.should be_an_instance_of(Hammerspace::Hash)
+    end
 
-  it "takes a block" do
-    hash = nil
-    Hammerspace.new(path) { |h| hash = h }
+    it "takes a block and sets default_proc" do
+      hash = Hammerspace::Hash.new(path, options) { |h,k| k }
+      hash.default_proc.should be_an_instance_of(Proc)
+    end
 
-    hash.should be_an_instance_of(Hammerspace::Hash)
   end
 
 end
