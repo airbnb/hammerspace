@@ -8,9 +8,7 @@ module Hammerspace
 
     attr_reader :path
     attr_reader :options
-
     attr_reader :backend
-
     attr_reader :default_proc
 
     # TODO: include more methods that ruby's Hash supports
@@ -45,10 +43,8 @@ module Hammerspace
     def initialize(path, options={}, &block)
       @path    = path
       @options = DEFAULT_OPTIONS.merge(options)
-
+      @backend = @options[:backend].new(self, @path, @options)
       self.default_proc=(block) if block_given?
-
-      construct_backend
     end
 
     def default(*args)
@@ -67,12 +63,6 @@ module Hammerspace
     def default_proc=(value)
       @default = nil
       @default_proc = value
-    end
-
-    private
-
-    def construct_backend
-      @backend = options[:backend].new(path, options)
     end
 
   end
