@@ -121,8 +121,7 @@ module Hammerspace
       end
 
       def has_value?(value)
-        each { |k,v| return true if v == value }
-        false
+        !!@frontend.find { |k,v| v == value }
       end
 
       def merge!(hash)
