@@ -6,12 +6,14 @@ module Hammerspace
 
     class Base
 
+      attr_reader :frontend
       attr_reader :path
       attr_reader :options
 
-      def initialize(path, options={})
-        @path    = path
-        @options = options
+      def initialize(frontend, path, options={})
+        @frontend = frontend
+        @path     = path
+        @options  = options
 
         check_fs unless File.exist?(lockfile_path)
       end

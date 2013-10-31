@@ -146,6 +146,23 @@ describe Hammerspace do
         run_write_concurrency_test(path, options)
       end
 
+      describe "#[]" do
+
+        it "returns value if key exists" do
+          hash = Hammerspace.new(path, options)
+          hash.default = 'default'
+          hash['foo'] = 'bar'
+          hash['foo'].should == 'bar'
+        end
+
+        it "returns default value if key does not exist" do
+          hash = Hammerspace.new(path, options)
+          hash.default = 'default'
+          hash['foo'].should == 'default'
+        end
+
+      end
+
       describe "#clear" do
 
         it "removes all keys and values" do

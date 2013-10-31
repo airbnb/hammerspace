@@ -49,7 +49,8 @@ module Hammerspace
         close_logwriter
         open_hash
 
-        @hash ? @hash[key] : nil
+        return @hash[key] if @hash && @hash.include?(key)
+        frontend.default(key)
       end
 
       def []=(key, value)
