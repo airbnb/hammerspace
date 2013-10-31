@@ -20,9 +20,26 @@ describe Hammerspace::Hash do
       hash.backend.should be_a_kind_of(Hammerspace::Backend::Base)
     end
 
+    it "takes a third argument and sets default" do
+      hash = Hammerspace::Hash.new(path, options, 'default')
+      hash.default.should == 'default'
+    end
+
     it "takes a block and sets default_proc" do
       hash = Hammerspace::Hash.new(path, options) { |h,k| k }
       hash.default_proc.should be_an_instance_of(Proc)
+    end
+
+    it "raises ArgumentError if both third argument and block are passed" do
+      expect {
+        Hammerspace::Hash.new(path, options, 'default') { |h,k| k }
+      }.to raise_error(ArgumentError)
+    end
+
+    it "raises ArgumentError if a fourth argument is passed" do
+      expect {
+        Hammerspace::Hash.new(path, options, 'default', 'bogus')
+      }.to raise_error(ArgumentError)
     end
 
   end

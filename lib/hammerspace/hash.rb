@@ -40,12 +40,19 @@ module Hammerspace
       :backend => Hammerspace::Backend::Sparkey
     }
 
-    # TODO: support setting default value
-    def initialize(path, options={}, &block)
+    def initialize(path, options={}, *args, &block)
+      raise ArgumentError, "wrong number of arguments" if args.size > 1
+
       @path    = path
       @options = DEFAULT_OPTIONS.merge(options)
       @backend = @options[:backend].new(self, @path, @options)
-      self.default_proc=(block) if block_given?
+
+      if block_given?
+        self.default_proc=(block)
+        raise ArgumentError, "wrong number of arguments" if args.size == 1
+      else
+        self.default=args.first
+      end
     end
 
     def default(*args)
