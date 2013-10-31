@@ -118,6 +118,35 @@ module Hammerspace
         @hash ? @hash.empty? : true
       end
 
+      def fetch(key, *args)
+        raise ArgumentError, "wrong number of arguments" if args.size > 1
+
+        close_logwriter
+        open_hash
+
+        return @hash[key] if @hash && @hash.include?(key)
+
+        if block_given?
+          yield key
+        elsif args.size == 1
+          args.first
+        else
+          raise KeyError, "key not found: \"#{key}\""
+        end
+      end
+
+      def flatten(*args)
+        # Note: the optional level argument is supported for compatibility, but
+        # it will never have an effect because only string values are
+        # supported.
+        raise ArgumentError, "wrong number of arguments" if args.size > 1
+
+        @frontend.each_with_object([]) do |args, array|
+          array << args.first
+          array << args.last
+        end
+      end
+
       def has_key?(key)
         close_logwriter
         open_hash
@@ -141,6 +170,14 @@ module Hammerspace
         @frontend
       end
 
+      def key(key)
+        close_logwriter
+        open_hash
+
+        return @hash[key] if @hash && @hash.include?(key)
+        nil
+      end
+
       def keys
         close_logwriter
         open_hash
@@ -162,11 +199,28 @@ module Hammerspace
         @hash ? @hash.size : 0
       end
 
+      def to_a
+        @frontend.each_with_object([]) { |args, array| array << [args.first, args.last] }
+      end
+
+      def to_hash
+        @frontend.each_with_object({}) { |args, hash| hash[args.first] = args.last }
+      end
+
+      def to_s
+        # Not terribly efficient, but hopefully only used in development.
+        to_hash.to_s
+      end
+
       def values
         close_logwriter
         open_hash
 
         @hash ? @hash.values : []
+      end
+
+      def values_at(*args)
+        args.map { |key| self[key] }
       end
 
       private

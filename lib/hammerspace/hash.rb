@@ -20,14 +20,23 @@ module Hammerspace
       :delete,
       :each,
       :empty?,
+      :fetch,
+      :flatten,
       :has_key?,
       :has_value?,
       :merge!,
+      :key,
       :keys,
       :replace,
       :size,
-      :values
+      :to_a,
+      :to_hash,
+      :to_s,
+      :values,
+      :values_at
 
+    alias_method :store, :[]=
+    alias_method :each_pair, :each
     alias_method :key?, :has_key?
     alias_method :include?, :has_key?
     alias_method :member?, :has_key?

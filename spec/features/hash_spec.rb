@@ -414,6 +414,84 @@ describe Hammerspace do
 
       end
 
+      describe "#fetch" do
+
+        it "returns value if key exists" do
+          hash = Hammerspace.new(path, options)
+          hash['foo'] = 'bar'
+          hash.fetch('foo').should == 'bar'
+        end
+
+        it "calls block to determine value if key does not exist" do
+          hash = Hammerspace.new(path, options)
+          hash.fetch('foo') { |key| "block#{key}" }.should == "blockfoo"
+          hash.close
+        end
+
+        it "returns default value if key does not exist" do
+          hash = Hammerspace.new(path, options)
+          hash.fetch('foo', 'default').should == 'default'
+          hash.close
+        end
+
+        it "calls block to determine value if key does not exist and both second argument and block are passed" do
+          hash = Hammerspace.new(path, options)
+          hash.fetch('foo', 'default') { |key| "block#{key}" }.should == "blockfoo"
+          hash.close
+        end
+
+        it "raises KeyError if key does not exist" do
+          hash = Hammerspace.new(path, options)
+          expect {
+            hash.fetch('foo')
+          }.to raise_error(KeyError)
+          hash.close
+        end
+
+        it "raises ArgumentError if a third argument is passed" do
+          hash = Hammerspace.new(path, options)
+          expect {
+            hash.fetch('foo', 'default', 'bogus')
+          }.to raise_error(ArgumentError)
+          hash.close
+        end
+
+      end
+
+      describe "#flatten" do
+
+        it "returns an array of key value pairs" do
+          hash = Hammerspace.new(path, options)
+          hash['a'] = 'A'
+          hash['b'] = 'B'
+          hash.flatten.should == ['a', 'A', 'b', 'B']
+          hash.close
+        end
+
+        it "returns an empty array when empty" do
+          hash = Hammerspace.new(path, options)
+          hash.flatten.should == []
+          hash.close
+        end
+
+        it "accepts an optional level argument" do
+          hash = Hammerspace.new(path, options)
+          hash['a'] = 'A'
+          hash['b'] = 'B'
+          hash.flatten(2).should == ['a', 'A', 'b', 'B']
+          hash.close
+        end
+
+        it "raises ArgumentError if a second argument is passed" do
+          hash = Hammerspace.new(path, options)
+          expect {
+            hash.flatten(1, 'bogus')
+          }.to raise_error(ArgumentError)
+          hash.close
+        end
+
+      end
+
       describe "#has_key?" do
 
         it "returns true when key is present" do
@@ -462,6 +540,21 @@ describe Hammerspace do
 
       end
 
+      describe "#key" do
+
+        it "returns value if key exists" do
+          hash = Hammerspace.new(path, options)
+          hash['foo'] = 'bar'
+          hash.key('foo').should == 'bar'
+        end
+
+        it "returns nil if key does not exist" do
+          hash = Hammerspace.new(path, options)
+          hash.key('foo').should be_nil
+        end
+
+      end
+
       describe "#keys" do
 
         it "returns keys" do
@@ -497,7 +590,7 @@ describe Hammerspace do
           hash.close
         end
 
-        it "calls block on duplicates to determine value" do
+        it "calls block to determine value on duplicates" do
           hash = Hammerspace.new(path, options)
           hash['foo'] = 'bar'
           hash.merge!({'foo' => 'newvalue'}) { |key, v1, v2| v1 + v2 }
@@ -550,6 +643,60 @@ describe Hammerspace do
 
       end
 
+      describe "#to_a" do
+
+        it "returns an array of key value pairs" do
+          hash = Hammerspace.new(path, options)
+          hash['a'] = 'A'
+          hash['b'] = 'B'
+          hash.to_a.should == [['a', 'A'], ['b', 'B']]
+          hash.close
+        end
+
+        it "returns an empty array when empty" do
+          hash = Hammerspace.new(path, options)
+          hash.to_a.should == []
+          hash.close
+        end
+
+      end
+
+      describe "#to_hash" do
+
+        it "returns a hash" do
+          hash = Hammerspace.new(path, options)
+          hash['a'] = 'A'
+          hash['b'] = 'B'
+          hash.to_hash.should == {'a' => 'A', 'b' => 'B'}
+          hash.close
+        end
+
+        it "returns an empty hash when empty" do
+          hash = Hammerspace.new(path, options)
+          hash.to_hash.should == {}
+          hash.close
+        end
+
+      end
+
+      describe "#to_s" do
+
+        it "returns a string" do
+          hash = Hammerspace.new(path, options)
+          hash['a'] = 'A'
+          hash['b'] = 'B'
+          hash.to_s.should == '{"a"=>"A", "b"=>"B"}'
+          hash.close
+        end
+
+        it "returns a string when empty" do
+          hash = Hammerspace.new(path, options)
+          hash.to_s.should == '{}'
+          hash.close
+        end
+
+      end
+
       describe "#values" do
 
         it "returns values" do
@@ -563,6 +710,26 @@ describe Hammerspace do
         it "returns empty array when empty" do
           hash = Hammerspace.new(path, options)
           hash.values.should == []
+          hash.close
+        end
+
+      end
+
+      describe "#values_at" do
+
+        it "returns values" do
+          hash = Hammerspace.new(path, options)
+          hash['a'] = 'A'
+          hash['b'] = 'B'
+          hash.values_at('b', 'a').should == ['B', 'A']
+          hash.close
+        end
+
+        it "returns default values when keys do not exist" do
+          hash = Hammerspace.new(path, options)
+          hash.default = 'default'
+          hash['a'] = 'A'
+          hash.values_at('a', 'b').should == ['A', 'default']
           hash.close
         end
 
