@@ -30,7 +30,8 @@ module Hammerspace
 
     alias_method :key?, :has_key?
     alias_method :include?, :has_key?
-    alias_method :member?, :has_value?
+    alias_method :member?, :has_key?
+    alias_method :value?, :has_value?
     alias_method :update, :merge!
     alias_method :initialize_copy, :replace
     alias_method :length, :size
