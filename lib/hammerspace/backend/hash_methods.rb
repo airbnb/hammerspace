@@ -1,6 +1,15 @@
 module Hammerspace
   module HashMethods
 
+    def ==(hash)
+      return false if size != hash.size
+      each do |key, value|
+        return false unless hash.has_key?(key)
+        return false unless hash[key] == value
+      end
+      true
+    end
+
     def [](key)
       raise NotImplementedError
     end
@@ -49,6 +58,15 @@ module Hammerspace
 
     def empty?
       size == 0
+    end
+
+    def eql?(hash)
+      return false if size != hash.size
+      each do |key, value|
+        return false unless hash.has_key?(key)
+        return false unless hash[key].eql?(value)
+      end
+      true
     end
 
     def fetch(key, *args)

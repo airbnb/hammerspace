@@ -137,6 +137,91 @@ describe Hammerspace do
         run_write_concurrency_test(path, options)
       end
 
+      describe "#==" do
+
+        it "returns false if different sizes" do
+          h1 = Hammerspace.new(File.join(path, '1'), options)
+          h1['a'] = 'A'
+          h1['b'] = 'B'
+
+          h2 = Hammerspace.new(File.join(path, '2'), options)
+          h2['a'] = 'A'
+
+          h1.should_not == h2
+
+          h1.close
+          h2.close
+        end
+
+        it "does not consider default values" do
+          h1 = Hammerspace.new(File.join(path, '1'), options)
+          h1['a'] = 'A'
+          h1['b'] = 'B'
+
+          h2 = Hammerspace.new(File.join(path, '2'), options, 'B')
+          h2['a'] = 'A'
+
+          h1.should_not == h2
+
+          h1.close
+          h2.close
+        end
+
+        it "returns false if different keys" do
+          h1 = Hammerspace.new(File.join(path, '1'), options)
+          h1['a'] = 'A'
+          h1['b'] = 'B'
+
+          h2 = Hammerspace.new(File.join(path, '2'), options)
+          h2['a'] = 'A'
+          h2['B'] = 'B'
+
+          h1.should_not == h2
+
+          h1.close
+          h2.close
+        end
+
+        it "returns false if different values" do
+          h1 = Hammerspace.new(File.join(path, '1'), options)
+          h1['a'] = 'A'
+          h1['b'] = 'B'
+
+          h2 = Hammerspace.new(File.join(path, '2'), options)
+          h2['a'] = 'A'
+          h2['b'] = 'b'
+
+          h1.should_not == h2
+
+          h1.close
+          h2.close
+        end
+
+        it "returns true if same keys and values" do
+          h1 = Hammerspace.new(File.join(path, '1'), options)
+          h1['a'] = 'A'
+          h1['b'] = 'B'
+
+          h2 = Hammerspace.new(File.join(path, '2'), options)
+          h2['a'] = 'A'
+          h2['b'] = 'B'
+
+          h1.should == h2
+
+          h1.close
+          h2.close
+        end
+
+        it "works with hashes" do
+          hash = Hammerspace.new(File.join(path, '1'), options)
+          hash['a'] = 'A'
+          hash['b'] = 'B'
+          hash.should == {'a' => 'A', 'b' => 'B'}
+          hash.close
+        end
+
+      end
+
       describe "#[]" do
 
         it "returns value if key exists" do
@@ -144,18 +229,21 @@ describe Hammerspace do
           hash.default = 'default'
           hash['foo'] = 'bar'
           hash['foo'].should == 'bar'
+          hash.close
         end
 
         it "returns default value if key does not exist" do
           hash = Hammerspace.new(path, options)
           hash.default = 'default'
           hash['foo'].should == 'default'
+          hash.close
         end
 
         it "supports storing the default value" do
           hash = Hammerspace.new(path, options) { |h,k| h[k] = 'Go fish' }
           hash['foo'].should == 'Go fish'
           hash.include?('foo').should be_true
+          hash.close
         end
 
       end
@@ -169,6 +257,7 @@ describe Hammerspace do
           key = 'key'
           hash['foo'].should == 'bar'
           hash['key'].should be_nil
+          hash.close
         end
 
       end
@@ -722,6 +811,91 @@ describe Hammerspace do
           hash = Hammerspace.new(path, options)
           hash['foo'] = 'bar'
           hash.empty?.should be_false
+          hash.close
+        end
+
+      end
+
+      describe "#eql?" do
+
+        it "returns false if different sizes" do
+          h1 = Hammerspace.new(File.join(path, '1'), options)
+          h1['a'] = 'A'
+          h1['b'] = 'B'
+
+          h2 = Hammerspace.new(File.join(path, '2'), options)
+          h2['a'] = 'A'
+
+          h1.should_not eql(h2)
+
+          h1.close
+          h2.close
+        end
+
+        it "does not consider default values" do
+          h1 = Hammerspace.new(File.join(path, '1'), options)
+          h1['a'] = 'A'
+          h1['b'] = 'B'
+
+          h2 = Hammerspace.new(File.join(path, '2'), options, 'B')
+          h2['a'] = 'A'
+
+          h1.should_not eql(h2)
+
+          h1.close
+          h2.close
+        end
+
+        it "returns false if different keys" do
+          h1 = Hammerspace.new(File.join(path, '1'), options)
+          h1['a'] = 'A'
+          h1['b'] = 'B'
+
+          h2 = Hammerspace.new(File.join(path, '2'), options)
+          h2['a'] = 'A'
+          h2['B'] = 'B'
+
+          h1.should_not eql(h2)
+
+          h1.close
+          h2.close
+        end
+
+        it "returns false if different values" do
+          h1 = Hammerspace.new(File.join(path, '1'), options)
+          h1['a'] = 'A'
+          h1['b'] = 'B'
+
+          h2 = Hammerspace.new(File.join(path, '2'), options)
+          h2['a'] = 'A'
+          h2['b'] = 'b'
+
+          h1.should_not eql(h2)
+
+          h1.close
+          h2.close
+        end
+
+        it "returns true if same keys and values" do
+          h1 = Hammerspace.new(File.join(path, '1'), options)
+          h1['a'] = 'A'
+          h1['b'] = 'B'
+
+          h2 = Hammerspace.new(File.join(path, '2'), options)
+          h2['a'] = 'A'
+          h2['b'] = 'B'
+
+          h1.should eql(h2)
+
+          h1.close
+          h2.close
+        end
+
+        it "works with hashes" do
+          hash = Hammerspace.new(File.join(path, '1'), options)
+          hash['a'] = 'A'
+          hash['b'] = 'B'
+          hash.should eql({'a' => 'A', 'b' => 'B'})
           hash.close
         end
 

@@ -13,6 +13,7 @@ module Hammerspace
 
     # TODO: include more methods that ruby's Hash supports
     def_delegators :backend,
+      :==,
       :[],
       :[]=,
       :clear,
@@ -23,6 +24,7 @@ module Hammerspace
       :each_key,
       :each_value,
       :empty?,
+      :eql?,
       :fetch,
       :flatten,
       :has_key?,
