@@ -195,10 +195,6 @@ module Hammerspace
       count
     end
 
-    def to_a
-      each_with_object([]) { |args, array| array << [args.first, args.last] }
-    end
-
     def to_hash
       each_with_object({}) { |args, hash| hash[args.first] = args.last }
     end
