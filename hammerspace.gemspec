@@ -10,8 +10,8 @@ Gem::Specification.new do |s|
   s.authors      = ["Jon Tai"]
   s.email        = ["jon.tai@airbnb.com"]
   s.homepage     = "https://github.com/airbnb/hammerspace"
-  s.summary      = "Off-heap large object storage"
-  s.description  = "Where one stores oversized objects, like giant hammers"
+  s.summary      = "Hash-like interface to persistent, concurrent, off-heap storage"
+  s.description  = "A convenient place to store giant hammers"
 
   s.files        = `git ls-files`.split("\n")
   s.test_files   = `git ls-files -- spec/*`.split("\n")
