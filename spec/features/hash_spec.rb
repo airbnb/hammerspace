@@ -874,6 +874,26 @@ describe Hammerspace do
 
       end
 
+      describe "#shift" do
+
+        it "removes and returns the first key value pair" do
+          hash = Hammerspace.new(path, options)
+          hash['a'] = 'A'
+          hash['b'] = 'B'
+          hash.shift.should == ['a', 'A']
+          hash.keys.should == ['b']
+          hash.values.should == ['B']
+          hash.close
+        end
+
+        it "returns the default value if empty" do
+          hash = Hammerspace.new(path, options, 'default')
+          hash.shift.should == 'default'
+          hash.close
+        end
+
+      end
+
       describe "#size" do
 
         it "returns size" do

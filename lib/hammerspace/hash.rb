@@ -30,6 +30,7 @@ module Hammerspace
       :key,
       :keys,
       :replace,
+      :shift,
       :size,
       :to_a,
       :to_hash,

@@ -100,6 +100,17 @@ module Hammerspace
       merge!(hash)
     end
 
+    def shift
+      items = frontend.take(1)
+      if items.empty?
+        frontend.default
+      else
+        pair = items.first
+        delete(pair.first)
+        pair
+      end
+    end
+
     def size
       count = 0
       each { |key, value| count += 1 }
