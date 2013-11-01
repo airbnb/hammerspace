@@ -209,190 +209,159 @@ describe Hammerspace do
 
       describe "#each" do
 
-        it "allows iteration with block" do
-          keys = []
-          values = []
-
-          hash = Hammerspace.new(path, options)
-          hash['a'] = 'A'
-          hash['b'] = 'B'
-          hash.each do |key,value|
-            keys << key
-            values << value
-          end
-          hash.close
-
-          keys.should == ['a', 'b']
-          values.should == ['A', 'B']
+        let(:keys)   { [] }
+        let(:values) { [] }
+        let(:hash) do
+          h = Hammerspace.new(path, options)
+          h['a'] = 'A'
+          h['b'] = 'B'
+          h
         end
 
-        it "allows iteration with enumerator" do
-          keys = []
-          values = []
+        context "with block" do
 
-          hash = Hammerspace.new(path, options)
-          hash['a'] = 'A'
-          hash['b'] = 'B'
-          hash.each.map do |key,value|
-            keys << key
-            values << value
-          end
-          hash.close
+          it "allows iteration" do
+            hash.each do |key,value|
+              keys << key
+              values << value
+            end
+            hash.close
 
-          keys.should == ['a', 'b']
-          values.should == ['A', 'B']
-        end
-
-        it "allows iteration with block when empty" do
-          iterations = 0
-
-          hash = Hammerspace.new(path, options)
-          hash.each { |key,value| iterations += 1 }
-          hash.close
-
-          iterations.should == 0
-        end
-
-        it "allows iteration with enumerator when empty" do
-          iterations = 0
-
-          hash = Hammerspace.new(path, options)
-          hash.each.map { |key,value| iterations += 1 }
-          hash.close
-
-          iterations.should == 0
-        end
-
-        it "allows updating during iteration with block" do
-          keys = []
-          values = []
-
-          hash = Hammerspace.new(path, options)
-          hash['a'] = 'A'
-          hash['b'] = 'B'
-          hash.each do |key,value|
-            keys << key
-            values << value
-            hash[key] = 'C'
+            keys.should == ['a', 'b']
+            values.should == ['A', 'B']
           end
 
-          keys.should == ['a', 'b']
-          values.should == ['A', 'B']
+          it "allows iteration when empty" do
+            iterations = 0
 
-          hash['a'].should == 'C'
-          hash['b'].should == 'C'
+            hash = Hammerspace.new(path, options)
+            hash.each { |key,value| iterations += 1 }
+            hash.close
 
-          hash.close
-        end
-
-        it "allows updating during iteration with enumerator" do
-          keys = []
-          values = []
-
-          hash = Hammerspace.new(path, options)
-          hash['a'] = 'A'
-          hash['b'] = 'B'
-          hash.each.map do |key,value|
-            keys << key
-            values << value
-            hash[key] = 'C'
+            iterations.should == 0
           end
 
-          keys.should == ['a', 'b']
-          values.should == ['A', 'B']
+          it "allows updating during iteration" do
+            hash.each do |key,value|
+              keys << key
+              values << value
+              hash[key] = 'C'
+            end
 
-          hash['a'].should == 'C'
-          hash['b'].should == 'C'
+            keys.should == ['a', 'b']
+            values.should == ['A', 'B']
 
-          hash.close
-        end
+            hash['a'].should == 'C'
+            hash['b'].should == 'C'
 
-        it "allows updating and reading during iteration with block" do
-          keys = []
-          values = []
-
-          hash = Hammerspace.new(path, options)
-          hash['a'] = 'A'
-          hash['b'] = 'B'
-          hash.each do |key,value|
-            keys << key
-            values << value
-            hash[key] = 'C'
-            hash[key].should == 'C'
+            hash.close
           end
 
-          keys.should == ['a', 'b']
-          values.should == ['A', 'B']
+          it "allows updating and reading during iteration" do
+            hash.each do |key,value|
+              keys << key
+              values << value
+              hash[key] = 'C'
+              hash[key].should == 'C'
+            end
 
-          hash['a'].should == 'C'
-          hash['b'].should == 'C'
+            keys.should == ['a', 'b']
+            values.should == ['A', 'B']
 
-          hash.close
-        end
+            hash['a'].should == 'C'
+            hash['b'].should == 'C'
 
-        it "allows updating and reading during iteration with enumerator" do
-          keys = []
-          values = []
-
-          hash = Hammerspace.new(path, options)
-          hash['a'] = 'A'
-          hash['b'] = 'B'
-          hash.each.map do |key,value|
-            keys << key
-            values << value
-            hash[key] = 'C'
-            hash[key].should == 'C'
+            hash.close
           end
 
-          keys.should == ['a', 'b']
-          values.should == ['A', 'B']
+          it "isolates iterators during iteration" do
+            hash.each do |key,value|
+              hash['b'] = 'C'
+              keys << key
+              values << value
+            end
 
-          hash['a'].should == 'C'
-          hash['b'].should == 'C'
+            keys.should == ['a', 'b']
+            values.should == ['A', 'B']
 
-          hash.close
-        end
+            hash['b'].should == 'C'
 
-        it "isolates iterators during iteration with block" do
-          keys = []
-          values = []
-
-          hash = Hammerspace.new(path, options)
-          hash['a'] = 'A'
-          hash['b'] = 'B'
-          hash.each do |key,value|
-            hash['b'] = 'C'
-            keys << key
-            values << value
+            hash.close
           end
 
-          keys.should == ['a', 'b']
-          values.should == ['A', 'B']
-
-          hash['b'].should == 'C'
-
-          hash.close
         end
 
-        it "isolates iterators during iteration with enumerator" do
-          keys = []
-          values = []
+        context "with enumerator" do
 
-          hash = Hammerspace.new(path, options)
-          hash['a'] = 'A'
-          hash['b'] = 'B'
-          hash.each.map do |key,value|
-            hash['b'] = 'C'
-            keys << key
-            values << value
+          it "allows iteration" do
+            hash.each.each do |key,value|
+              keys << key
+              values << value
+            end
+            hash.close
+
+            keys.should == ['a', 'b']
+            values.should == ['A', 'B']
           end
 
-          keys.should == ['a', 'b']
-          values.should == ['A', 'B']
+          it "allows iteration when empty" do
+            iterations = 0
 
-          hash['b'].should == 'C'
+            hash = Hammerspace.new(path, options)
+            hash.each.each { |key,value| iterations += 1 }
+            hash.close
 
-          hash.close
+            iterations.should == 0
+          end
+
+          it "allows updating during iteration" do
+            hash.each.each do |key,value|
+              keys << key
+              values << value
+              hash[key] = 'C'
+            end
+
+            keys.should == ['a', 'b']
+            values.should == ['A', 'B']
+
+            hash['a'].should == 'C'
+            hash['b'].should == 'C'
+
+            hash.close
+          end
+
+          it "allows updating and reading during iteration" do
+            hash.each.each do |key,value|
+              keys << key
+              values << value
+              hash[key] = 'C'
+              hash[key].should == 'C'
+            end
+
+            keys.should == ['a', 'b']
+            values.should == ['A', 'B']
+
+            hash['a'].should == 'C'
+            hash['b'].should == 'C'
+
+            hash.close
+          end
+
+          it "isolates iterators during iteration" do
+            hash.each.each do |key,value|
+              hash['b'] = 'C'
+              keys << key
+              values << value
+            end
+
+            keys.should == ['a', 'b']
+            values.should == ['A', 'B']
+
+            hash['b'].should == 'C'
+
+            hash.close
+          end
+
         end
 
       end
