@@ -64,7 +64,7 @@ module Hammerspace
         close_hash
         close_logwriter_clear
 
-        @frontend
+        frontend
       end
 
       def close
@@ -98,7 +98,7 @@ module Hammerspace
           ensure
             hash.close
           end
-          @frontend
+          frontend
         else
           # Gnista does not support each w/o a block; emulate the behavior here.
           Enumerator.new do |y|
@@ -109,13 +109,6 @@ module Hammerspace
             end
           end
         end
-      end
-
-      def empty?
-        close_logwriter
-        open_hash
-
-        @hash ? @hash.empty? : true
       end
 
       def fetch(key, *args)
@@ -135,47 +128,11 @@ module Hammerspace
         end
       end
 
-      def flatten(*args)
-        # Note: the optional level argument is supported for compatibility, but
-        # it will never have an effect because only string values are
-        # supported.
-        raise ArgumentError, "wrong number of arguments" if args.size > 1
-
-        @frontend.each_with_object([]) do |args, array|
-          array << args.first
-          array << args.last
-        end
-      end
-
       def has_key?(key)
         close_logwriter
         open_hash
 
         @hash ? @hash.include?(key) : false
-      end
-
-      def has_value?(value)
-        !!@frontend.find { |k,v| v == value }
-      end
-
-      def merge!(hash)
-        hash.each do |key,value|
-          if block_given?
-            self[key] = yield key, self[key], value
-          else
-            self[key] = value
-          end
-        end
-
-        @frontend
-      end
-
-      def key(key)
-        close_logwriter
-        open_hash
-
-        return @hash[key] if @hash && @hash.include?(key)
-        nil
       end
 
       def keys
@@ -199,23 +156,11 @@ module Hammerspace
         @hash ? @hash.size : 0
       end
 
-      def to_a
-        @frontend.each_with_object([]) { |args, array| array << [args.first, args.last] }
-      end
-
-      def to_hash
-        @frontend.each_with_object({}) { |args, hash| hash[args.first] = args.last }
-      end
-
       def values
         close_logwriter
         open_hash
 
         @hash ? @hash.values : []
-      end
-
-      def values_at(*args)
-        args.map { |key| self[key] }
       end
 
       private
