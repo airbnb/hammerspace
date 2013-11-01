@@ -262,6 +262,30 @@ describe Hammerspace do
 
       end
 
+      describe "#assoc" do
+
+        it "returns key value pair when key is present" do
+          hash = Hammerspace.new(path, options)
+          hash['foo'] = 'bar'
+          hash.assoc('foo').should == ['foo', 'bar']
+          hash.close
+        end
+
+        it "returns nil when key is not present" do
+          hash = Hammerspace.new(path, options)
+          hash['foo'] = 'bar'
+          hash.assoc('otherkey').should be_nil
+          hash.close
+        end
+
+        it "returns nil when empty" do
+          hash = Hammerspace.new(path, options)
+          hash.assoc('foo').should be_nil
+          hash.close
+        end
+
+      end
+
       describe "#clear" do
 
         it "removes all keys and values" do
@@ -1130,6 +1154,38 @@ describe Hammerspace do
         it "returns the hash" do
           hash = Hammerspace.new(path, options)
           hash.merge!({}).should == hash
+          hash.close
+        end
+
+      end
+
+      describe "#rassoc" do
+
+        it "returns key value pair when value is present" do
+          hash = Hammerspace.new(path, options)
+          hash['foo'] = 'bar'
+          hash.rassoc('bar').should == ['foo', 'bar']
+          hash.close
+        end
+
+        it "returns first key value pair when value is present multiple times" do
+          hash = Hammerspace.new(path, options)
+          hash['foo'] = 'bar'
+          hash['otherkey'] = 'bar'
+          hash.rassoc('bar').should == ['foo', 'bar']
+          hash.close
+        end
+
+        it "returns nil when value is not present" do
+          hash = Hammerspace.new(path, options)
+          hash['foo'] = 'bar'
+          hash.rassoc('otherkey').should be_nil
+          hash.close
+        end
+
+        it "returns nil when empty" do
+          hash = Hammerspace.new(path, options)
+          hash.rassoc('foo').should be_nil
           hash.close
         end
 

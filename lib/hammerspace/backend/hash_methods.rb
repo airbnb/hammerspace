@@ -18,6 +18,10 @@ module Hammerspace
       raise NotImplementedError
     end
 
+    def assoc(key)
+      frontend.find { |k,v| k == key }
+    end
+
     def clear
       each { |key, value| delete(key) }
       frontend
@@ -129,6 +133,10 @@ module Hammerspace
         end
       end
       frontend
+    end
+
+    def rassoc(value)
+      frontend.find { |k,v| v == value }
     end
 
     def reject!
