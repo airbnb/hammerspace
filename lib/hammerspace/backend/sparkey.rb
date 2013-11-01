@@ -111,23 +111,6 @@ module Hammerspace
         end
       end
 
-      def fetch(key, *args)
-        raise ArgumentError, "wrong number of arguments" if args.size > 1
-
-        close_logwriter
-        open_hash
-
-        return @hash[key] if @hash && @hash.include?(key)
-
-        if block_given?
-          yield key
-        elsif args.size == 1
-          args.first
-        else
-          raise KeyError, "key not found: \"#{key}\""
-        end
-      end
-
       def has_key?(key)
         close_logwriter
         open_hash

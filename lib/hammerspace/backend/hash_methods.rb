@@ -10,7 +10,8 @@ module Hammerspace
     end
 
     def clear
-      raise NotImplementedError
+      each { |key, value| delete(key) }
+      frontend
     end
 
     def delete(key)
@@ -26,7 +27,17 @@ module Hammerspace
     end
 
     def fetch(key, *args)
-      raise NotImplementedError
+      raise ArgumentError, "wrong number of arguments" if args.size > 1
+
+      return self[key] if has_key?(key)
+
+      if block_given?
+        yield key
+      elsif args.size == 1
+        args.first
+      else
+        raise KeyError, "key not found: \"#{key}\""
+      end
     end
 
     def flatten(*args)
@@ -42,7 +53,7 @@ module Hammerspace
     end
 
     def has_key?(key)
-      raise NotImplementedError
+      !!frontend.find { |k,v| k.eql?(key) }
     end
 
     def has_value?(value)
@@ -54,27 +65,29 @@ module Hammerspace
     end
 
     def keys
-      raise NotImplementedError
+      each.map { |key, value| key }
     end
 
     def merge!(hash)
-      hash.each do |key,value|
+      hash.each do |key, value|
         if block_given?
           self[key] = yield key, self[key], value
         else
           self[key] = value
         end
       end
-
       frontend
     end
 
     def replace(hash)
-      raise NotImplementedError
+      clear
+      merge!(hash)
     end
 
     def size
-      raise NotImplementedError
+      count = 0
+      each { |key, value| count += 1 }
+      count
     end
 
     def to_a
@@ -86,7 +99,7 @@ module Hammerspace
     end
 
     def values
-      raise NotImplementedError
+      each.map { |key, value| value }
     end
 
     def values_at(*args)
