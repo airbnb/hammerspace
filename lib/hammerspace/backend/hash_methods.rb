@@ -18,11 +18,21 @@ module Hammerspace
       raise NotImplementedError
     end
 
+    def delete_if
+      if block_given?
+        each { |key, value| delete(key) if yield key, value }
+      else
+        Enumerator.new do |y|
+          each { |key, value| delete(key) if y.yield(key, value) }
+        end
+      end
+    end
+
     def each(&block)
       raise NotImplementedError
     end
 
-    def each_key(&block)
+    def each_key
       if block_given?
         each { |key, value| yield key }
       else
@@ -30,7 +40,7 @@ module Hammerspace
       end
     end
 
-    def each_value(&block)
+    def each_value
       if block_given?
         each { |key, value| yield value }
       else
@@ -74,6 +84,16 @@ module Hammerspace
 
     def has_value?(value)
       !!frontend.find { |k,v| v == value }
+    end
+
+    def keep_if
+      if block_given?
+        each { |key, value| delete(key) unless yield key, value }
+      else
+        Enumerator.new do |y|
+          each { |key, value| delete(key) unless y.yield(key, value) }
+        end
+      end
     end
 
     def key(key)

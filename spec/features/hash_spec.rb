@@ -29,15 +29,6 @@ describe Hammerspace do
         hash.close
       end
 
-      it "deletes" do
-        hash = Hammerspace.new(path, options)
-        hash['foo'] = 'bar'
-        hash.delete('foo')
-        hash.key?('foo').should be_false
-        hash['foo'].should be_nil
-        hash.close
-      end
-
       it "supports interleaved gets and sets" do
         hash = Hammerspace.new(path, options)
         hash['foo'] = 'bar'
@@ -209,6 +200,61 @@ describe Hammerspace do
           hash = Hammerspace.new(path, options)
           hash.clear.should == hash
           hash.close
+        end
+
+      end
+
+      describe "#delete" do
+
+        it "deletes" do
+          hash = Hammerspace.new(path, options)
+          hash['foo'] = 'bar'
+          hash.delete('foo')
+          hash.key?('foo').should be_false
+          hash['foo'].should be_nil
+          hash.close
+        end
+
+      end
+
+      describe "#delete_if" do
+
+        let(:hash) do
+          h = Hammerspace.new(path, options)
+          h['a'] = 'A'
+          h['b'] = 'B'
+          h
+        end
+
+        context "with block" do
+
+          it "deletes when true" do
+            hash.delete_if { |key,value| key == 'a' }
+            hash.key?('a').should be_false
+            hash['a'].should be_nil
+            hash.key?('b').should be_true
+            hash['b'].should == 'B'
+            hash.close
+          end
+
+          it "returns the hash" do
+            hash.delete_if { |key,value| true }.should == hash
+            hash.close
+          end
+
+        end
+
+        context "with enumerator" do
+
+          it "deletes when true" do
+            hash.delete_if.each { |key,value| key == 'a' }
+            hash.key?('a').should be_false
+            hash['a'].should be_nil
+            hash.key?('b').should be_true
+            hash['b'].should == 'B'
+            hash.close
+          end
+
         end
 
       end
@@ -803,6 +849,48 @@ describe Hammerspace do
           hash = Hammerspace.new(path, options)
           hash.has_value?('foo').should be_false
           hash.close
+        end
+
+      end
+
+      describe "#keep_if" do
+
+        let(:hash) do
+          h = Hammerspace.new(path, options)
+          h['a'] = 'A'
+          h['b'] = 'B'
+          h
+        end
+
+        context "with block" do
+
+          it "keeps when true" do
+            hash.keep_if { |key,value| key == 'b' }
+            hash.key?('a').should be_false
+            hash['a'].should be_nil
+            hash.key?('b').should be_true
+            hash['b'].should == 'B'
+            hash.close
+          end
+
+          it "returns the hash" do
+            hash.keep_if { |key,value| true }.should == hash
+            hash.close
+          end
+
+        end
+
+        context "with enumerator" do
+
+          it "keeps when true" do
+            hash.keep_if.each { |key,value| key == 'b' }
+            hash.key?('a').should be_false
+            hash['a'].should be_nil
+            hash.key?('b').should be_true
+            hash['b'].should == 'B'
+            hash.close
+          end
+
         end
 
       end
