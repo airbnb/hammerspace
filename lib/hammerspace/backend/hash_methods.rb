@@ -210,8 +210,11 @@ module Hammerspace
     alias_method :store, :[]=
     alias_method :each_pair, :each
     alias_method :key?, :has_key?
-    alias_method :include?, :has_key?
-    alias_method :member?, :has_key?
+
+    # alias_method seems to conflict with Enumerable's version of these methods
+    def include?(key); has_key?(key); end
+    def member?(key); has_key?(key); end
+
     alias_method :value?, :has_value?
     alias_method :update, :merge!
     alias_method :initialize_copy, :replace

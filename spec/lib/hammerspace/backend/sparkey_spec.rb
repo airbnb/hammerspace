@@ -162,4 +162,30 @@ describe Hammerspace::Backend::Sparkey do
 
   end
 
+  describe "#include?" do
+
+    it "calls has_key?" do
+      Gnista::Hash.any_instance.should_receive(:include?).once.and_call_original
+
+      hash = Hammerspace.new(path, options)
+      hash['foo'] = 'bar'
+      hash.include?('foo').should be_true
+      hash.close
+    end
+
+  end
+
+  describe "#member?" do
+
+    it "calls has_key?" do
+      Gnista::Hash.any_instance.should_receive(:include?).once.and_call_original
+
+      hash = Hammerspace.new(path, options)
+      hash['foo'] = 'bar'
+      hash.member?('foo').should be_true
+      hash.close
+    end
+
+  end
+
 end

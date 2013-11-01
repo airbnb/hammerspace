@@ -323,7 +323,7 @@ describe Hammerspace do
           hash = Hammerspace.new(path, options)
           hash['foo'] = 'bar'
           hash.delete('foo')
-          hash.key?('foo').should be_false
+          hash.has_key?('foo').should be_false
           hash['foo'].should be_nil
           hash.close
         end
@@ -343,9 +343,9 @@ describe Hammerspace do
 
           it "deletes when true" do
             hash.delete_if { |key,value| key == 'a' }
-            hash.key?('a').should be_false
+            hash.has_key?('a').should be_false
             hash['a'].should be_nil
-            hash.key?('b').should be_true
+            hash.has_key?('b').should be_true
             hash['b'].should == 'B'
             hash.close
           end
@@ -361,9 +361,9 @@ describe Hammerspace do
 
           it "deletes when true" do
             hash.delete_if.each { |key,value| key == 'a' }
-            hash.key?('a').should be_false
+            hash.has_key?('a').should be_false
             hash['a'].should be_nil
-            hash.key?('b').should be_true
+            hash.has_key?('b').should be_true
             hash['b'].should == 'B'
             hash.close
           end
@@ -1064,9 +1064,9 @@ describe Hammerspace do
 
           it "keeps when true" do
             hash.keep_if { |key,value| key == 'b' }
-            hash.key?('a').should be_false
+            hash.has_key?('a').should be_false
             hash['a'].should be_nil
-            hash.key?('b').should be_true
+            hash.has_key?('b').should be_true
             hash['b'].should == 'B'
             hash.close
           end
@@ -1082,9 +1082,9 @@ describe Hammerspace do
 
           it "keeps when true" do
             hash.keep_if.each { |key,value| key == 'b' }
-            hash.key?('a').should be_false
+            hash.has_key?('a').should be_false
             hash['a'].should be_nil
-            hash.key?('b').should be_true
+            hash.has_key?('b').should be_true
             hash['b'].should == 'B'
             hash.close
           end
@@ -1204,9 +1204,9 @@ describe Hammerspace do
 
           it "deletes when true" do
             hash.reject! { |key,value| key == 'a' }
-            hash.key?('a').should be_false
+            hash.has_key?('a').should be_false
             hash['a'].should be_nil
-            hash.key?('b').should be_true
+            hash.has_key?('b').should be_true
             hash['b'].should == 'B'
             hash.close
           end
@@ -1227,9 +1227,9 @@ describe Hammerspace do
 
           it "deletes when true" do
             hash.reject!.each { |key,value| key == 'a' }
-            hash.key?('a').should be_false
+            hash.has_key?('a').should be_false
             hash['a'].should be_nil
-            hash.key?('b').should be_true
+            hash.has_key?('b').should be_true
             hash['b'].should == 'B'
             hash.close
           end
@@ -1282,9 +1282,9 @@ describe Hammerspace do
 
           it "keeps when true" do
             hash.select! { |key,value| key == 'b' }
-            hash.key?('a').should be_false
+            hash.has_key?('a').should be_false
             hash['a'].should be_nil
-            hash.key?('b').should be_true
+            hash.has_key?('b').should be_true
             hash['b'].should == 'B'
             hash.close
           end
@@ -1305,9 +1305,9 @@ describe Hammerspace do
 
           it "keeps when true" do
             hash.select!.each { |key,value| key == 'b' }
-            hash.key?('a').should be_false
+            hash.has_key?('a').should be_false
             hash['a'].should be_nil
-            hash.key?('b').should be_true
+            hash.has_key?('b').should be_true
             hash['b'].should == 'B'
             hash.close
           end
