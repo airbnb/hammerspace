@@ -5,6 +5,7 @@ module Hammerspace
   module Backend
 
     class Base
+      include Enumerable
       include HashMethods
 
       attr_reader :frontend

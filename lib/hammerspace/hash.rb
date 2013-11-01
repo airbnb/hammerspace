@@ -4,13 +4,13 @@ module Hammerspace
 
   class Hash
     extend Forwardable
-    include Enumerable
 
     attr_reader :path
     attr_reader :options
     attr_reader :backend
     attr_reader :default_proc
 
+    def_delegators :backend, *Enumerable.instance_methods
     def_delegators :backend, *HashMethods.instance_methods
     def_delegator  :backend, :close
 

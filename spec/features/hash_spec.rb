@@ -242,7 +242,7 @@ describe Hammerspace do
         it "supports storing the default value" do
           hash = Hammerspace.new(path, options) { |h,k| h[k] = 'Go fish' }
           hash['foo'].should == 'Go fish'
-          hash.include?('foo').should be_true
+          hash.has_key?('foo').should be_true
           hash.close
         end
 

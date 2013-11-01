@@ -19,7 +19,7 @@ module Hammerspace
     end
 
     def assoc(key)
-      frontend.find { |k,v| k == key }
+      find { |k,v| k == key }
     end
 
     def clear
@@ -93,18 +93,18 @@ module Hammerspace
       # supported.
       raise ArgumentError, "wrong number of arguments" if args.size > 1
 
-      frontend.each_with_object([]) do |args, array|
+      each_with_object([]) do |args, array|
         array << args.first
         array << args.last
       end
     end
 
     def has_key?(key)
-      !!frontend.find { |k,v| k.eql?(key) }
+      !!find { |k,v| k.eql?(key) }
     end
 
     def has_value?(value)
-      !!frontend.find { |k,v| v == value }
+      !!find { |k,v| v == value }
     end
 
     def keep_if(&block)
@@ -136,7 +136,7 @@ module Hammerspace
     end
 
     def rassoc(value)
-      frontend.find { |k,v| v == value }
+      find { |k,v| v == value }
     end
 
     def reject!
@@ -179,7 +179,7 @@ module Hammerspace
     end
 
     def shift
-      items = frontend.take(1)
+      items = take(1)
       if items.empty?
         frontend.default
       else
@@ -196,11 +196,11 @@ module Hammerspace
     end
 
     def to_a
-      frontend.each_with_object([]) { |args, array| array << [args.first, args.last] }
+      each_with_object([]) { |args, array| array << [args.first, args.last] }
     end
 
     def to_hash
-      frontend.each_with_object({}) { |args, hash| hash[args.first] = args.last }
+      each_with_object({}) { |args, hash| hash[args.first] = args.last }
     end
 
     def values
