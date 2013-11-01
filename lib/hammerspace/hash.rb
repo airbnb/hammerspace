@@ -11,49 +11,8 @@ module Hammerspace
     attr_reader :backend
     attr_reader :default_proc
 
-    # TODO: include more methods that ruby's Hash supports
-    def_delegators :backend,
-      :==,
-      :[],
-      :[]=,
-      :assoc,
-      :clear,
-      :close,
-      :delete,
-      :delete_if,
-      :each,
-      :each_key,
-      :each_value,
-      :empty?,
-      :eql?,
-      :fetch,
-      :flatten,
-      :has_key?,
-      :has_value?,
-      :merge!,
-      :keep_if,
-      :key,
-      :keys,
-      :rassoc,
-      :reject!,
-      :replace,
-      :select!,
-      :shift,
-      :size,
-      :to_a,
-      :to_hash,
-      :values,
-      :values_at
-
-    alias_method :store, :[]=
-    alias_method :each_pair, :each
-    alias_method :key?, :has_key?
-    alias_method :include?, :has_key?
-    alias_method :member?, :has_key?
-    alias_method :value?, :has_value?
-    alias_method :update, :merge!
-    alias_method :initialize_copy, :replace
-    alias_method :length, :size
+    def_delegators :backend, *HashMethods.instance_methods
+    def_delegator  :backend, :close
 
     DEFAULT_OPTIONS = {
       :backend => Hammerspace::Backend::Sparkey
