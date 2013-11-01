@@ -19,6 +19,10 @@ module Hammerspace
         check_fs unless File.exist?(lockfile_path)
       end
 
+      def close
+        # No-op, should probably be overridden
+      end
+
       def check_fs
         warn_flock unless flock_works?
       end
