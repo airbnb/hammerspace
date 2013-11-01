@@ -961,6 +961,53 @@ describe Hammerspace do
 
       end
 
+      describe "#reject!" do
+
+        let(:hash) do
+          h = Hammerspace.new(path, options)
+          h['a'] = 'A'
+          h['b'] = 'B'
+          h
+        end
+
+        context "with block" do
+
+          it "deletes when true" do
+            hash.reject! { |key,value| key == 'a' }
+            hash.key?('a').should be_false
+            hash['a'].should be_nil
+            hash.key?('b').should be_true
+            hash['b'].should == 'B'
+            hash.close
+          end
+
+          it "returns the hash if items deleted" do
+            hash.reject! { |key,value| true }.should == hash
+            hash.close
+          end
+
+          it "returns nil if no items deleted" do
+            hash.reject! { |key,value| false }.should be_nil
+            hash.close
+          end
+
+        end
+
+        context "with enumerator" do
+
+          it "deletes when true" do
+            hash.reject!.each { |key,value| key == 'a' }
+            hash.key?('a').should be_false
+            hash['a'].should be_nil
+            hash.key?('b').should be_true
+            hash['b'].should == 'B'
+            hash.close
+          end
+
+        end
+
+      end
+
       describe "#replace" do
 
         it "removes values" do
@@ -988,6 +1035,53 @@ describe Hammerspace do
           hash = Hammerspace.new(path, options)
           hash.replace({}).should == hash
           hash.close
+        end
+
+      end
+
+      describe "#select!" do
+
+        let(:hash) do
+          h = Hammerspace.new(path, options)
+          h['a'] = 'A'
+          h['b'] = 'B'
+          h
+        end
+
+        context "with block" do
+
+          it "keeps when true" do
+            hash.select! { |key,value| key == 'b' }
+            hash.key?('a').should be_false
+            hash['a'].should be_nil
+            hash.key?('b').should be_true
+            hash['b'].should == 'B'
+            hash.close
+          end
+
+          it "returns the hash if items deleted" do
+            hash.select! { |key,value| false }.should == hash
+            hash.close
+          end
+
+          it "returns nil if no items deleted" do
+            hash.select! { |key,value| true }.should be_nil
+            hash.close
+          end
+
+        end
+
+        context "with enumerator" do
+
+          it "keeps when true" do
+            hash.select!.each { |key,value| key == 'b' }
+            hash.key?('a').should be_false
+            hash['a'].should be_nil
+            hash.key?('b').should be_true
+            hash['b'].should == 'B'
+            hash.close
+          end
+
         end
 
       end
