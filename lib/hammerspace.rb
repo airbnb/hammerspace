@@ -1,7 +1,7 @@
 require 'colored'
 
 require 'hammerspace/version'
-require 'hammerspace/backend/hash_methods'
+require 'hammerspace/hash_methods'
 require 'hammerspace/backend'
 require 'hammerspace/hash'
 
