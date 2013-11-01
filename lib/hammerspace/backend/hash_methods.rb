@@ -22,6 +22,22 @@ module Hammerspace
       raise NotImplementedError
     end
 
+    def each_key(&block)
+      if block_given?
+        each { |key, value| yield key }
+      else
+        Enumerator.new { |y| each { |key, value| y << key } }
+      end
+    end
+
+    def each_value(&block)
+      if block_given?
+        each { |key, value| yield value }
+      else
+        Enumerator.new { |y| each { |key, value| y << value } }
+      end
+    end
+
     def empty?
       size == 0
     end

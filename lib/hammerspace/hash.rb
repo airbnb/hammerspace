@@ -19,6 +19,8 @@ module Hammerspace
       :close,
       :delete,
       :each,
+      :each_key,
+      :each_value,
       :empty?,
       :fetch,
       :flatten,
