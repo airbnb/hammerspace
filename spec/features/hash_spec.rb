@@ -205,6 +205,12 @@ describe Hammerspace do
           hash.close
         end
 
+        it "returns the hash" do
+          hash = Hammerspace.new(path, options)
+          hash.clear.should == hash
+          hash.close
+        end
+
       end
 
       describe "#each" do
@@ -362,6 +368,10 @@ describe Hammerspace do
             hash.close
           end
 
+          it "returns the hash" do
+            hash.each { |key,value| 'foo' }.should == hash
+          end
+
         end
 
       end
@@ -437,6 +447,10 @@ describe Hammerspace do
             hash['b'].should == 'C'
 
             hash.close
+          end
+
+          it "returns the hash" do
+            hash.each_key { |key| 'foo' }.should == hash
           end
 
         end
@@ -577,6 +591,10 @@ describe Hammerspace do
             hash['b'].should == 'C'
 
             hash.close
+          end
+
+          it "returns the hash" do
+            hash.each_value { |value| 'foo' }.should == hash
           end
 
         end
@@ -847,6 +865,12 @@ describe Hammerspace do
           hash.close
         end
 
+        it "returns the hash" do
+          hash = Hammerspace.new(path, options)
+          hash.merge!({}).should == hash
+          hash.close
+        end
+
       end
 
       describe "#replace" do
@@ -869,6 +893,12 @@ describe Hammerspace do
 
           hash.replace({'foo' => 'newvalue'})
           hash['foo'].should == 'newvalue'
+          hash.close
+        end
+
+        it "returns the hash" do
+          hash = Hammerspace.new(path, options)
+          hash.replace({}).should == hash
           hash.close
         end
 
