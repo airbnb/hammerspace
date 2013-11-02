@@ -1,4 +1,11 @@
 module Hammerspace
+
+  # Basic implementations of most methods supported by Ruby's hash
+  #
+  # Analogous to Enumerable. Mixed into Hammerspace::Backend::Base. A backend
+  # need only implement four methods: [], []=, delete, and each. However, a
+  # backend may choose to override some of the default implementations if the
+  # backend is able to implement the methods more efficiently.
   module HashMethods
 
     def ==(hash)
@@ -24,6 +31,7 @@ module Hammerspace
 
     def clear
       each { |key, value| delete(key) }
+      close # flush immediately
       frontend
     end
 

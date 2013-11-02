@@ -4,6 +4,11 @@ require 'tempfile'
 module Hammerspace
   module Backend
 
+    # "Backend" class from which concrete backends extend
+    #
+    # Mixes in Enumerable and HashMethods to provide default implementations of
+    # most methods that Ruby's hash supports. Also provides some basic file and
+    # lock handling methods common to backends.
     class Base
       include Enumerable
       include HashMethods

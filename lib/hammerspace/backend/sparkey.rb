@@ -164,7 +164,7 @@ module Hammerspace
 
       def open_logwriter_replace
         @logwriter ||= begin
-          # Create a new log file in a new, private directory.  Writes to this
+          # Create a new log file in a new, private directory. Writes to this
           # new file can happen independently of all other writers, so no
           # locking is required.
           regenerate_uid

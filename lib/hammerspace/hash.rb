@@ -2,6 +2,12 @@ require 'forwardable'
 
 module Hammerspace
 
+  # "Frontend" class
+  #
+  # All hammerspace functionality is exposed through this class's interface.
+  # Responsible for setting up the backend and delegating methods to the
+  # backend. Also handles default values. This functionality is designed to be
+  # consistent across backends; backends cannot be override this functionality.
   class Hash
     extend Forwardable
 
