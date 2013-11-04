@@ -2,60 +2,59 @@ require 'forwardable'
 
 module Hammerspace
 
+  # "Frontend" class
+  #
+  # All hammerspace functionality is exposed through this class's interface.
+  # Responsible for setting up the backend and delegating methods to the
+  # backend. Also handles default values. This functionality is designed to be
+  # consistent across backends; backends cannot be override this functionality.
   class Hash
     extend Forwardable
-    include Enumerable
 
     attr_reader :path
     attr_reader :options
-
     attr_reader :backend
+    attr_reader :default_proc
 
-    # TODO: include more methods that ruby's Hash supports
-    def_delegators :backend,
-      :[],
-      :[]=,
-      :clear,
-      :close,
-      :delete,
-      :each,
-      :empty?,
-      :has_key?,
-      :has_value?,
-      :merge!,
-      :keys,
-      :replace,
-      :size,
-      :values
-
-    alias_method :key?, :has_key?
-    alias_method :include?, :has_key?
-    alias_method :member?, :has_key?
-    alias_method :value?, :has_value?
-    alias_method :update, :merge!
-    alias_method :initialize_copy, :replace
-    alias_method :length, :size
+    def_delegators :backend, *Enumerable.instance_methods
+    def_delegators :backend, *HashMethods.instance_methods
+    def_delegator  :backend, :close
 
     DEFAULT_OPTIONS = {
       :backend => Hammerspace::Backend::Sparkey
     }
 
-    def initialize(path, options={})
+    def initialize(path, options={}, *args, &block)
+      raise ArgumentError, "wrong number of arguments" if args.size > 1
+
       @path    = path
       @options = DEFAULT_OPTIONS.merge(options)
-
-      construct_backend
+      @backend = @options[:backend].new(self, @path, @options)
 
       if block_given?
-        yield self
-        close
+        self.default_proc=(block)
+        raise ArgumentError, "wrong number of arguments" if args.size == 1
+      else
+        self.default=args.first
       end
     end
 
-    private
+    def default(*args)
+      if @default_proc && args.size
+        @default_proc.call(self, args.first)
+      else
+        @default
+      end
+    end
 
-    def construct_backend
-      @backend = options[:backend].new(path, options)
+    def default=(value)
+      @default_proc = nil
+      @default = value
+    end
+
+    def default_proc=(value)
+      @default = nil
+      @default_proc = value
     end
 
   end

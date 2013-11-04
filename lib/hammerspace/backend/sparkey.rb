@@ -49,7 +49,8 @@ module Hammerspace
         close_logwriter
         open_hash
 
-        @hash ? @hash[key] : nil
+        return @hash[key] if @hash && @hash.include?(key)
+        frontend.default(key)
       end
 
       def []=(key, value)
@@ -62,6 +63,8 @@ module Hammerspace
       def clear
         close_hash
         close_logwriter_clear
+
+        frontend
       end
 
       def close
@@ -69,6 +72,8 @@ module Hammerspace
         close_hash
       end
 
+      # TODO: This currently always returns nil. If the key is not found,
+      # return the default value. Also, support block usage.
       def delete(key)
         close_hash
         open_logwriter
@@ -93,6 +98,7 @@ module Hammerspace
           ensure
             hash.close
           end
+          frontend
         else
           # Gnista does not support each w/o a block; emulate the behavior here.
           Enumerator.new do |y|
@@ -105,27 +111,11 @@ module Hammerspace
         end
       end
 
-      def empty?
-        close_logwriter
-        open_hash
-
-        @hash ? @hash.empty? : true
-      end
-
       def has_key?(key)
         close_logwriter
         open_hash
 
         @hash ? @hash.include?(key) : false
-      end
-
-      def has_value?(value)
-        each { |k,v| return true if v == value }
-        false
-      end
-
-      def merge!(hash)
-        hash.each { |key,value| self[key] = value }
       end
 
       def keys
@@ -174,7 +164,7 @@ module Hammerspace
 
       def open_logwriter_replace
         @logwriter ||= begin
-          # Create a new log file in a new, private directory.  Writes to this
+          # Create a new log file in a new, private directory. Writes to this
           # new file can happen independently of all other writers, so no
           # locking is required.
           regenerate_uid

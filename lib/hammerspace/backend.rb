@@ -4,16 +4,29 @@ require 'tempfile'
 module Hammerspace
   module Backend
 
+    # "Backend" class from which concrete backends extend
+    #
+    # Mixes in Enumerable and HashMethods to provide default implementations of
+    # most methods that Ruby's hash supports. Also provides some basic file and
+    # lock handling methods common to backends.
     class Base
+      include Enumerable
+      include HashMethods
 
+      attr_reader :frontend
       attr_reader :path
       attr_reader :options
 
-      def initialize(path, options={})
-        @path    = path
-        @options = options
+      def initialize(frontend, path, options={})
+        @frontend = frontend
+        @path     = path
+        @options  = options
 
         check_fs unless File.exist?(lockfile_path)
+      end
+
+      def close
+        # No-op, should probably be overridden
       end
 
       def check_fs
