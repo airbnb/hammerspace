@@ -1,3 +1,7 @@
+# v0.1.1
+* Expose the uid of the directory that the current reader is reading from.
+* Documentation updates.
+
 # v0.1.0
 * Change semantics of block passed to constructor, now used to specify default_proc.
 * Add support for most Ruby Hash methods.
