@@ -18,7 +18,7 @@ module Hammerspace
 
     def_delegators :backend, *Enumerable.instance_methods
     def_delegators :backend, *HashMethods.instance_methods
-    def_delegator  :backend, :close
+    def_delegators :backend, :close, :uid
 
     DEFAULT_OPTIONS = {
       :backend => Hammerspace::Backend::Sparkey
