@@ -139,6 +139,13 @@ module Hammerspace
         @hash ? @hash.size : 0
       end
 
+      def uid
+        close_logwriter
+        open_hash
+
+        @uid
+      end
+
       def values
         close_logwriter
         open_hash
@@ -234,7 +241,20 @@ module Hammerspace
       end
 
       def open_hash
-        @hash ||= open_hash_private
+        # Take a shared lock before opening files. This avoids a situation
+        # where a writer updates the files after we have opened the hash file
+        # but before we have opened the log file. Once we have open file
+        # descriptors it doesn't matter what happens to the files, so we can
+        # release the lock immediately after opening. While we are holding the
+        # lock, note the target of the "current" symlink.
+        @hash ||= lock_for_read do
+          begin
+            hash = Gnista::Hash.new(cur_hash_path, cur_log_path)
+            @uid = File.readlink(cur_path)
+            hash
+          rescue GnistaException
+          end
+        end
       end
 
       def open_hash_private

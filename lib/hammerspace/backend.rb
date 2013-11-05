@@ -29,6 +29,10 @@ module Hammerspace
         # No-op, should probably be overridden
       end
 
+      def uid
+        # No-op, should probably be overridden
+      end
+
       def check_fs
         warn_flock unless flock_works?
       end

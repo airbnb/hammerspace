@@ -172,7 +172,7 @@ work unless you create an explicit reference to the string.
 h = Hammerspace.new("/tmp/hammerspace")
 h["foo"] = "bar"
 
-# This doesn't work like Ruby's Hash because the subsequent access creates a new object
+# This doesn't work like Ruby's Hash because every access creates a new object
 h["foo"].upcase!
 h["foo"]  #=> "bar"
 
@@ -180,6 +180,9 @@ h["foo"]  #=> "bar"
 value = h["foo"]
 value.upcase!
 value  #=> "BAR"
+
+# Another access, another a new object
+h["foo"]  #=> "bar"
 
 h.close
 ```
@@ -234,22 +237,92 @@ the reader opens its files lazily on first read, not when the hammerspace
 object is created.
 
 ```ruby
+h = Hammerspace.new("/tmp/hammerspace")
+h["foo"] = "bar"
+h.close
+
 reader1 = Hammerspace.new("/tmp/hammerspace")
-reader1.has_key?("foo")  #=> false
+reader1["foo"]  #=> "bar"
+
+writer = Hammerspace.new("/tmp/hammerspace")
+writer["foo"] = "updated"
+writer.close
+
+# Still "bar" because reader1 opened its files before the write
+reader1["foo"]  #=> "bar"
+
+# Updated key is visible because reader2 opened its files after the write
+reader2 = Hammerspace.new("/tmp/hammerspace")
+reader2["foo"]  #=> "updated"
+reader2.close
+
+reader1.close
+```
+
+A new hammerspace object does not necessarily need to be created. Calling
+`close` will close the files, then the reader will open them lazily again on
+the next read.
+
+```ruby
+h = Hammerspace.new("/tmp/hammerspace")
+h["foo"] = "bar"
+h.close
+
+reader = Hammerspace.new("/tmp/hammerspace")
+reader["foo"]  #=> "bar"
+
+writer = Hammerspace.new("/tmp/hammerspace")
+writer["foo"] = "updated"
+writer.close
+
+reader["foo"]  #=> "bar"
+
+# Close files now, re-open lazily on next read
+reader.close
+
+reader["foo"]  #=> "updated"
+reader.close
+```
+
+If no hammerspace files exist on disk yet, the reader will fail to open the
+files. It will try again on next read.
+
+```ruby
+reader = Hammerspace.new("/tmp/hammerspace")
+reader.has_key?("foo")  #=> false
 
 writer = Hammerspace.new("/tmp/hammerspace")
 writer["foo"] = "bar"
 writer.close
 
-# Key is not present because reader1 opened its files before the write
-reader1.has_key?("foo")  #=> false
+# Files are opened here
+reader.has_key?("foo")  #=> true
+reader.close
+```
 
-# Key is present because reader2 opened its files after the write
-reader2 = Hammerspace.new("/tmp/hammerspace")
-reader2.has_key?("foo")  #=> true
-reader2.close
+You can call `uid` to get a unique id that identifies the version of the files
+being read. `uid` will be `nil` if no hammerspace files exist on disk yet.
 
-reader1.close
+```ruby
+reader = Hammerspace.new("/tmp/hammerspace")
+reader.uid  #=> nil
+
+writer = Hammerspace.new("/tmp/hammerspace")
+writer["foo"] = "bar"
+writer.close
+
+reader.close
+reader.uid  #=> "24913_53943df0-e784-4873-ade6-d1cccc848a70"
+
+# The uid changes on every write, even if the content is the same, i.e., it's
+# an identifier, not a checksum
+writer["foo"] = "bar"
+writer.close
+
+reader.close
+reader.uid  #=> "24913_9371024e-8c80-477b-8558-7c292bfcbfc1"
+
+reader.close
 ```
 
 Multiple concurrent writers are also supported. When a writer flushes its
