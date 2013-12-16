@@ -90,7 +90,9 @@ module Hammerspace
         # the hash is only closed once iteration is complete.
         hash = open_hash_private
 
-        return block_given? ? nil : Enumerator.new {} unless hash
+        unless hash
+          return block_given? ? nil : Enumerator.new {}
+        end
 
         if block_given?
           begin
