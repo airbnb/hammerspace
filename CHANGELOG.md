@@ -1,3 +1,9 @@
+# v0.1.2
+* Support vagrant for local development.
+* Remove dependency on colored gem.
+* Add MIT license.
+* Documentation updates.
+
 # v0.1.1
 * Expose the uid of the directory that the current reader is reading from.
 * Documentation updates.
