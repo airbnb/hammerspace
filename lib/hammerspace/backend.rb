@@ -25,6 +25,10 @@ module Hammerspace
         check_fs unless File.exist?(lockfile_path)
       end
 
+      # HashMethods (mixed in above) defines four methods that must be
+      # overridden. The default implementations simply raise
+      # NotImplementedError. The four methods are: [], []=, delete, and each.
+
       def close
         # No-op, should probably be overridden
       end

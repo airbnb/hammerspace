@@ -46,8 +46,8 @@ with existing applications simple and straightforward. Different low-level
 libraries can be used by implementing a new backend that uses the library.
 (Currently, only [Sparkey](https://github.com/spotify/sparkey) is supported.)
 Backends only need to implement a small set of methods (`[]`, `[]=`, `close`,
-`delete`, `each`), but can override the default implementation of other methods
-if the underlying library supports more efficient implementations.
+`delete`, `each`, `uid`), but can override the default implementation of other
+methods if the underlying library supports more efficient implementations.
 
 ## Installation
 
