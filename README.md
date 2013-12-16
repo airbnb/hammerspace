@@ -69,6 +69,18 @@ Then run:
 
     bundle
 
+### Vagrant
+
+To make development easier, the source tree contains a Vagrantfile and a small
+cookbook to install all the prerequisites. The vagrant environment also serves
+as a consistent environment to run the test suite.
+
+To use it, make sure you have vagrant installed, then:
+
+    vagrant up
+    vagrant ssh
+    bundle exec rspec
+
 
 ## Usage
 
