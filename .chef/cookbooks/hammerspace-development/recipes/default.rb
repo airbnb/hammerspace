@@ -22,3 +22,11 @@ execute "hammerspace-bundle-install" do
   group       node.hammerspace_development.user
   command     "bundle install --path #{node.hammerspace_development.hammerspace.gem_home}"
 end
+
+directory node.hammerspace_development.hammerspace.root do
+  owner     node.hammerspace_development.user
+  group     node.hammerspace_development.user
+  mode      '0755'
+  recursive true
+  action    :create
+end

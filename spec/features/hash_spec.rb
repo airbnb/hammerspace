@@ -5,7 +5,7 @@ describe Hammerspace do
   [Hammerspace::Backend::Sparkey].each do |backend|
     describe backend do
 
-      let(:path) { 'tmp' }
+      let(:path) { HAMMERSPACE_ROOT }
       let(:options) { { :backend => backend } }
 
       before do

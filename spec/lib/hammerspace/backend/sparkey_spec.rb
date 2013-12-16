@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Hammerspace::Backend::Sparkey do
 
-  let(:path) { 'tmp' }
+  let(:path) { HAMMERSPACE_ROOT }
   let(:options) { {} }
 
   before do

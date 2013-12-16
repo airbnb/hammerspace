@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Hammerspace do
 
-  let(:path) { 'tmp' }
+  let(:path) { HAMMERSPACE_ROOT }
   let(:options) { {} }
 
   describe "#initialize" do

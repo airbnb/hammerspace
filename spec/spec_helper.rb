@@ -20,3 +20,6 @@ RSpec.configure do |config|
   config.color_enabled = true
   config.include(WriteConcurrencyTest)
 end
+
+HAMMERSPACE_ROOT = ENV['HAMMERSPACE_ROOT'] || 'tmp'
+warn "Temporary hammerspace files will be written to #{HAMMERSPACE_ROOT}"
