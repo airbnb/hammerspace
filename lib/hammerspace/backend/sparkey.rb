@@ -307,8 +307,8 @@ module Hammerspace
       end
 
       def warn_dir_cleanup
-        warn "#{self.class}: Warning: filesystem does not appear to allow removing directories " \
-             "when files within are still in use. Directory cleanup may not behave as expected.".red
+        warn "filesystem does not appear to allow removing directories when files " \
+             "within are still in use. Directory cleanup may not behave as expected."
       end
 
     end

@@ -82,6 +82,10 @@ module Hammerspace
         end
       end
 
+      def warn(message)
+        Kernel.warn "\e[31m#{self.class}: Warning: #{message}\e[0m"
+      end
+
       private
 
       def lockfile_path
@@ -89,8 +93,8 @@ module Hammerspace
       end
 
       def warn_flock
-        warn "#{self.class}: Warning: filesystem does not appear to support flock(2). " \
-             "Concurrent access may not behave as expected.".red
+        warn "filesystem does not appear to support flock(2). " \
+             "Concurrent access may not behave as expected."
       end
 
     end
