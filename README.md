@@ -39,7 +39,7 @@ data is persistent, it does not need to be reloaded from an external cache or
 service on application startup unless the data has changed.
 
 Unfortunately, these low-level libraries don't always support concurrent
-writers. Hammerspace adds concurrency control to allow mutliple processes to
+writers. Hammerspace adds concurrency control to allow multiple processes to
 update and read from a single shared copy of the data safely. Finally,
 hammerspace's interface is designed to mimic Ruby's `Hash` to make integrating
 with existing applications simple and straightforward. Different low-level
