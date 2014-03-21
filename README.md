@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/airbnb/hammerspace.png?branch=master)](https://travis-ci.org/airbnb/hammerspace)
+
 Hammerspace
 ===========
 
