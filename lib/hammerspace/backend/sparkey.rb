@@ -53,7 +53,7 @@ module Hammerspace
 
         if @hash
           seek(key)
-          return @iterator.get_value if @iterator.active?
+          return get_value if @iterator.active?
         end
         frontend.default(key)
       end
@@ -254,8 +254,16 @@ module Hammerspace
           begin
             hash = ::Sparkey::HashReader.new
             hash.open(File.join(cur_path, 'hammerspace'))
-            @iterator = ::Sparkey::HashIterator.new(hash)
+
+            @log = hash.log_reader
+            @iterator = ::Sparkey::LogIterator.new(@log)
+
+            @max_value_length = @log.max_value_length
+            @value_buffer_ptr = FFI::MemoryPointer.new(:uint8, @max_value_length)
+            @value_buffer_length_ptr = FFI::MemoryPointer.new(:uint64)
+
             @uid = File.readlink(cur_path)
+
             hash
           rescue ::Sparkey::Error
           end
@@ -283,6 +291,12 @@ module Hammerspace
         key_ptr = FFI::MemoryPointer.new(:uint8, key_length).write_bytes(key)
 
         handle_status ::Sparkey::Native.hash_get(@hash.ptr, key_ptr, key_length, @iterator.ptr)
+      end
+
+      def get_value
+        handle_status ::Sparkey::Native.logiter_fill_value(@iterator.ptr, @log.ptr, @max_value_length, @value_buffer_ptr, @value_buffer_length_ptr)
+
+        @value_buffer_ptr.read_bytes(@value_buffer_length_ptr.read_uint64)
       end
 
       def each_with_iterator(hash)
