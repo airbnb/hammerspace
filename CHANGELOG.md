@@ -1,3 +1,7 @@
+# v0.2.0
+* Switch to adamtanner's sparkey bindings, fixes ruby crashes on OS X.
+* Upgrade to latest sparkey (0.2.0) in vagrant; required for sparkey bindings.
+
 # v0.1.2
 * Support vagrant for local development.
 * Remove dependency on colored gem.

@@ -22,7 +22,7 @@ describe Hammerspace::Backend::Sparkey do
   end
 
   it "bulks writes" do
-    Gnista::Hash.should_receive(:write).once.and_call_original
+    Sparkey::HashWriter.any_instance.should_receive(:create).once.and_call_original
 
     hash = Hammerspace.new(path, options)
     hash['foo'] = 'bar'
@@ -165,7 +165,7 @@ describe Hammerspace::Backend::Sparkey do
   describe "#include?" do
 
     it "calls has_key?" do
-      Gnista::Hash.any_instance.should_receive(:include?).once.and_call_original
+      Hammerspace::Backend::Sparkey.any_instance.should_receive(:has_key?).once.and_call_original
 
       hash = Hammerspace.new(path, options)
       hash['foo'] = 'bar'
@@ -178,7 +178,7 @@ describe Hammerspace::Backend::Sparkey do
   describe "#member?" do
 
     it "calls has_key?" do
-      Gnista::Hash.any_instance.should_receive(:include?).once.and_call_original
+      Hammerspace::Backend::Sparkey.any_instance.should_receive(:has_key?).once.and_call_original
 
       hash = Hammerspace.new(path, options)
       hash['foo'] = 'bar'
