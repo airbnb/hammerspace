@@ -53,8 +53,8 @@ methods if the underlying library supports more efficient implementations.
 
 ### Requirements
 
- * [Gnista](https://github.com/emnl/gnista), Ruby bindings for Sparkey
- * [Sparkey](https://github.com/spotify/sparkey), constant key/value storage library
+ * [Sparkey ruby bindings](https://github.com/adamtanner/sparkey), Ruby FFI bindings to Sparkey (tested with v1.3.0)
+ * [Sparkey](https://github.com/spotify/sparkey), constant key/value storage library (tested with v0.2.0)
  * [Snappy](https://code.google.com/p/snappy/), compression/decompression library (unused, but required to compile Sparkey)
  * A filesystem that supports `flock(2)` and unlinking files/directories with outstanding file descriptors (ext3/4 will do just fine)
 

@@ -1,4 +1,5 @@
-require 'gnista'
+require 'sparkey'
+require 'ffi'
 require 'fileutils'
 require 'securerandom'
 
@@ -6,6 +7,7 @@ module Hammerspace
   module Backend
 
     class Sparkey < Base
+      include ::Sparkey::Errors
 
       def check_fs
         super
@@ -49,7 +51,10 @@ module Hammerspace
         close_logwriter
         open_hash
 
-        return @hash[key] if @hash && @hash.include?(key)
+        if @hash
+          seek(key)
+          return get_value if @iterator.active?
+        end
         frontend.default(key)
       end
 
@@ -57,7 +62,8 @@ module Hammerspace
         close_hash
         open_logwriter
 
-        @logwriter[key] = value
+        @logwriter.put(key, value)
+        value
       end
 
       def clear
@@ -78,16 +84,13 @@ module Hammerspace
         close_hash
         open_logwriter
 
-        @logwriter.del(key)
+        @logwriter.delete(key)
       end
 
       def each(&block)
         close_logwriter
 
         # Open a private copy of the hash to ensure isolation during iteration.
-        # Further, Gnista segfaults if the hash is closed during iteration (e.g.,
-        # from interleaved reads and writes), so a private copy ensures that
-        # the hash is only closed once iteration is complete.
         hash = open_hash_private
 
         unless hash
@@ -96,16 +99,15 @@ module Hammerspace
 
         if block_given?
           begin
-            hash.each(&block)
+            each_with_iterator(hash, &block)
           ensure
             hash.close
           end
           frontend
         else
-          # Gnista does not support each w/o a block; emulate the behavior here.
           Enumerator.new do |y|
             begin
-              hash.each { |*args| y << args }
+              each_with_iterator(hash) { |*args| y << args }
             ensure
               hash.close
             end
@@ -117,19 +119,25 @@ module Hammerspace
         close_logwriter
         open_hash
 
-        @hash ? @hash.include?(key) : false
+        if @hash
+          seek(key)
+          return @iterator.active?
+        end
+        false
       end
 
       def keys
         close_logwriter
         open_hash
 
-        @hash ? @hash.keys : []
+        array = []
+        each_with_iterator(@hash) { |key,value| array << key }
+        array
       end
 
       def replace(hash)
         close_hash
-        open_logwriter_replace
+        open_logwriter(false)
 
         merge!(hash)
       end
@@ -138,7 +146,7 @@ module Hammerspace
         close_logwriter
         open_hash
 
-        @hash ? @hash.size : 0
+        @hash ? @hash.entry_count : 0
       end
 
       def uid
@@ -152,12 +160,14 @@ module Hammerspace
         close_logwriter
         open_hash
 
-        @hash ? @hash.values : []
+        array = []
+        each_with_iterator(@hash) { |key,value| array << value }
+        array
       end
 
       private
 
-      def open_logwriter
+      def open_logwriter(copy = true)
         @logwriter ||= begin
           # Create a new log file in a new, private directory and copy the
           # contents of the current hash over to it. Writes to this new file
@@ -165,20 +175,10 @@ module Hammerspace
           # required.
           regenerate_uid
           ensure_path_exists(new_path)
-          logwriter = Gnista::Logwriter.new(new_log_path)
-          each { |key,value| logwriter[key] = value }
+          logwriter = ::Sparkey::LogWriter.new
+          logwriter.create(File.join(new_path, 'hammerspace'), :compression_none, 0)
+          each { |key,value| logwriter.put(key, value) } if copy
           logwriter
-        end
-      end
-
-      def open_logwriter_replace
-        @logwriter ||= begin
-          # Create a new log file in a new, private directory. Writes to this
-          # new file can happen independently of all other writers, so no
-          # locking is required.
-          regenerate_uid
-          ensure_path_exists(new_path)
-          Gnista::Logwriter.new(new_log_path)
         end
       end
 
@@ -190,7 +190,8 @@ module Hammerspace
           # Create an index of the log file and write it to a hash file in the
           # same private directory. Again, this happens independently of all
           # other writers, so no locking is required.
-          Gnista::Hash.write(new_hash_path, new_log_path)
+          hashwriter = ::Sparkey::HashWriter.new
+          hashwriter.create(File.join(new_path, 'hammerspace'))
 
           # Create a symlink pointed at the private directory. Give the symlink
           # a temporary name for now. Note that the target of the symlink is
@@ -251,10 +252,20 @@ module Hammerspace
         # lock, note the target of the "current" symlink.
         @hash ||= lock_for_read do
           begin
-            hash = Gnista::Hash.new(cur_hash_path, cur_log_path)
+            hash = ::Sparkey::HashReader.new
+            hash.open(File.join(cur_path, 'hammerspace'))
+
+            @log = hash.log_reader
+            @iterator = ::Sparkey::LogIterator.new(@log)
+
+            @max_value_length = @log.max_value_length
+            @value_buffer_ptr = FFI::MemoryPointer.new(:uint8, @max_value_length)
+            @value_buffer_length_ptr = FFI::MemoryPointer.new(:uint64)
+
             @uid = File.readlink(cur_path)
+
             hash
-          rescue GnistaException
+          rescue ::Sparkey::Error
           end
         end
       end
@@ -267,14 +278,45 @@ module Hammerspace
         # release the lock immediately after opening.
         lock_for_read do
           begin
-            Gnista::Hash.new(cur_hash_path, cur_log_path)
-          rescue GnistaException
+            hash = ::Sparkey::HashReader.new
+            hash.open(File.join(cur_path, 'hammerspace'))
+            hash
+          rescue ::Sparkey::Error
+          end
+        end
+      end
+
+      def seek(key)
+        key_length = key.bytesize
+        key_ptr = FFI::MemoryPointer.new(:uint8, key_length).write_bytes(key)
+
+        handle_status ::Sparkey::Native.hash_get(@hash.ptr, key_ptr, key_length, @iterator.ptr)
+      end
+
+      def get_value
+        handle_status ::Sparkey::Native.logiter_fill_value(@iterator.ptr, @log.ptr, @max_value_length, @value_buffer_ptr, @value_buffer_length_ptr)
+
+        @value_buffer_ptr.read_bytes(@value_buffer_length_ptr.read_uint64)
+      end
+
+      def each_with_iterator(hash)
+        if hash
+          iterator = ::Sparkey::HashIterator.new(hash)
+          begin
+            loop do
+              iterator.next
+              break unless iterator.active?
+              yield iterator.get_key, iterator.get_value
+            end
+          ensure
+            iterator.close
           end
         end
       end
 
       def close_hash
         if @hash
+          @iterator.close
           @hash.close
           @hash = nil
         end
@@ -288,24 +330,8 @@ module Hammerspace
         File.join(path, @uid)
       end
 
-      def new_log_path
-        File.join(new_path, 'hammerspace.spl')
-      end
-
-      def new_hash_path
-        File.join(new_path, 'hammerspace.spi')
-      end
-
       def cur_path
         File.join(path, 'current')
-      end
-
-      def cur_log_path
-        File.join(cur_path, 'hammerspace.spl')
-      end
-
-      def cur_hash_path
-        File.join(cur_path, 'hammerspace.spi')
       end
 
       def warn_dir_cleanup
