@@ -250,11 +250,13 @@ module Hammerspace
         # release the lock immediately after opening. While we are holding the
         # lock, note the target of the "current" symlink.
         @hash ||= lock_for_read do
-          begin
-            hash = Gnista::Hash.new(cur_hash_path, cur_log_path)
-            @uid = File.readlink(cur_path)
-            hash
-          rescue GnistaException
+          if File.exists?(cur_hash_path) && File.exists?(cur_log_path)
+            begin
+              hash = Gnista::Hash.new(cur_hash_path, cur_log_path)
+              @uid = File.readlink(cur_path)
+              hash
+            rescue GnistaException
+            end
           end
         end
       end
@@ -266,9 +268,11 @@ module Hammerspace
         # descriptors it doesn't matter what happens to the files, so we can
         # release the lock immediately after opening.
         lock_for_read do
-          begin
-            Gnista::Hash.new(cur_hash_path, cur_log_path)
-          rescue GnistaException
+          if File.exists?(cur_hash_path) && File.exists?(cur_log_path)
+            begin
+              Gnista::Hash.new(cur_hash_path, cur_log_path)
+            rescue GnistaException
+            end
           end
         end
       end
