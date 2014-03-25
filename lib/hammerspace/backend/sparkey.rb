@@ -1,4 +1,5 @@
 require 'sparkey'
+require 'ffi'
 require 'fileutils'
 require 'securerandom'
 
@@ -6,6 +7,7 @@ module Hammerspace
   module Backend
 
     class Sparkey < Base
+      include ::Sparkey::Errors
 
       def check_fs
         super
@@ -50,14 +52,8 @@ module Hammerspace
         open_hash
 
         if @hash
-          iterator = @hash.seek(key)
-          value = nil
-          begin
-            value = iterator.get_value if iterator.active?
-          ensure
-            iterator.close
-          end
-          return value if value
+          seek(key)
+          return @iterator.get_value if @iterator.active?
         end
         frontend.default(key)
       end
@@ -123,16 +119,11 @@ module Hammerspace
         close_logwriter
         open_hash
 
-        has_key = false
         if @hash
-          iterator = @hash.seek(key)
-          begin
-            has_key = iterator.active?
-          ensure
-            iterator.close
-          end
+          seek(key)
+          return @iterator.active?
         end
-        has_key
+        false
       end
 
       def keys
@@ -263,6 +254,7 @@ module Hammerspace
           begin
             hash = ::Sparkey::HashReader.new
             hash.open(File.join(cur_path, 'hammerspace'))
+            @iterator = ::Sparkey::HashIterator.new(hash)
             @uid = File.readlink(cur_path)
             hash
           rescue ::Sparkey::Error
@@ -286,6 +278,13 @@ module Hammerspace
         end
       end
 
+      def seek(key)
+        key_length = key.bytesize
+        key_ptr = FFI::MemoryPointer.new(:uint8, key_length).write_bytes(key)
+
+        handle_status ::Sparkey::Native.hash_get(@hash.ptr, key_ptr, key_length, @iterator.ptr)
+      end
+
       def each_with_iterator(hash)
         if hash
           iterator = ::Sparkey::HashIterator.new(hash)
@@ -303,6 +302,7 @@ module Hammerspace
 
       def close_hash
         if @hash
+          @iterator.close
           @hash.close
           @hash = nil
         end
