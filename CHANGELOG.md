@@ -1,3 +1,7 @@
+# v0.1.3
+* Work around gnista bug that causes ruby crashes on OS X.
+* Upgrade to sparkey 0.2.0 in vagrant.
+
 # v0.1.2
 * Support vagrant for local development.
 * Remove dependency on colored gem.
