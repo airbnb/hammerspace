@@ -1,3 +1,7 @@
+# v0.1.4
+* Upgrade to gnista 0.0.5.
+* Remove work around for gnista bug.
+
 # v0.1.3
 * Work around gnista bug that causes ruby crashes on OS X.
 * Upgrade to sparkey 0.2.0 in vagrant.
