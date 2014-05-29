@@ -17,5 +17,5 @@ Gem::Specification.new do |s|
   s.test_files   = `git ls-files -- spec/*`.split("\n")
   s.require_path = 'lib'
 
-  s.add_runtime_dependency 'gnista', '0.0.5'
+  s.add_runtime_dependency 'gnista', '~> 1.0.0'
 end
