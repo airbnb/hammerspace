@@ -49,7 +49,10 @@ module Hammerspace
         close_logwriter
         open_hash
 
-        return @hash[key] if @hash && @hash.include?(key)
+        if @hash
+          value = @hash[key]
+          return value if value
+        end
         frontend.default(key)
       end
 
