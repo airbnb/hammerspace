@@ -246,6 +246,12 @@ describe Hammerspace do
           hash.close
         end
 
+        it "returns nil if no default is set and key does not exist" do
+          hash = Hammerspace.new(path, options)
+          hash['foo'].should be_nil
+          hash.close
+        end
+
       end
 
       describe "#[]=" do
@@ -257,6 +263,38 @@ describe Hammerspace do
           key = 'key'
           hash['foo'].should == 'bar'
           hash['key'].should be_nil
+          hash.close
+        end
+
+        it "does not allow non-string keys" do
+          hash = Hammerspace.new(path, options)
+          expect {
+            hash[8] = 'foo'
+          }.to raise_error TypeError
+          hash.close
+        end
+
+        it "does not allow non-string values" do
+          hash = Hammerspace.new(path, options)
+          expect {
+            hash['foo'] = 8
+          }.to raise_error TypeError
+          hash.close
+        end
+
+        it "does not allow nil keys" do
+          hash = Hammerspace.new(path, options)
+          expect {
+            hash[nil] = 'foo'
+          }.to raise_error TypeError
+          hash.close
+        end
+
+        it "does not allow nil values" do
+          hash = Hammerspace.new(path, options)
+          expect {
+            hash['foo'] = nil
+          }.to raise_error TypeError
           hash.close
         end
 
