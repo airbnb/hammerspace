@@ -1,3 +1,6 @@
+# v0.1.5
+* Avoid an unnecessary call to Gnista::Hash#include? on get.
+
 # v0.1.4
 * Upgrade to gnista 0.0.5.
 * Remove work around for gnista bug.
