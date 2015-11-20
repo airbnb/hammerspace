@@ -73,8 +73,8 @@ describe Hammerspace::Hash do
     it "unsets default" do
       hash = Hammerspace::Hash.new(path, options)
       hash.default = 'bar'
-      hash.default_proc = p
-      hash.default('foo').should be_nil
+      hash.default_proc = lambda { |h,k| k }
+      hash.default('foo').should == 'foo'
     end
 
   end
