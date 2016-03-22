@@ -63,7 +63,7 @@ module Hammerspace
       protected
 
       def ensure_path_exists(path)
-        FileUtils.mkdir_p(path)
+        FileUtils.mkdir_p(path) unless File.directory?(path)
       end
 
       def lock_for_write

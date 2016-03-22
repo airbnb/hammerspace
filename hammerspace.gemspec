@@ -7,8 +7,8 @@ Gem::Specification.new do |s|
   s.name         = "hammerspace"
   s.version      = Hammerspace::VERSION
   s.platform     = Gem::Platform::RUBY
-  s.authors      = ["Jon Tai", "Nelson Gauthier"]
-  s.email        = ["jon.tai@airbnb.com", "nelson@airbnb.com"]
+  s.authors      = `git log --format=%an -- lib`.split($/).uniq
+  s.email        = `git log --format=%ae -- lib`.split($/).uniq.grep(/airbnb.com$/)
   s.homepage     = "https://github.com/airbnb/hammerspace"
   s.summary      = "Hash-like interface to persistent, concurrent, off-heap storage"
   s.description  = "A convenient place to store giant hammers"
