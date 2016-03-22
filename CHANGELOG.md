@@ -1,3 +1,6 @@
+# v0.1.6
+* Avoid calling mkdir_p unless needed because it uses exceptions for control flow.
+
 # v0.1.5
 * Avoid an unnecessary call to Gnista::Hash#include? on get.
 
