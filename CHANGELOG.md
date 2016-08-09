@@ -1,3 +1,6 @@
+# v0.1.7
+* Upgrade to gnista 1.0.1 to fix memory leak on missing key access.
+
 # v0.1.6
 * Avoid calling mkdir_p unless needed because it uses exceptions for control flow.
 
