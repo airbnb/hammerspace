@@ -168,7 +168,7 @@ module Hammerspace
           # required.
           regenerate_uid
           ensure_path_exists(new_path)
-          logwriter = Gnista::Logwriter.new(new_log_path)
+          logwriter = Gnista::Logwriter.new(*logwriter_args)
           each { |key,value| logwriter[key] = value }
           logwriter
         end
@@ -181,8 +181,12 @@ module Hammerspace
           # locking is required.
           regenerate_uid
           ensure_path_exists(new_path)
-          Gnista::Logwriter.new(new_log_path)
+          Gnista::Logwriter.new(*logwriter_args)
         end
+      end
+
+      def logwriter_args
+        [new_log_path, options[:block_size]].compact
       end
 
       def close_logwriter

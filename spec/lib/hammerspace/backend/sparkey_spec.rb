@@ -21,6 +21,32 @@ describe Hammerspace::Backend::Sparkey do
     Dir.exist?(path).should be_true
   end
 
+  describe "compression with :block_size option" do
+    def total
+      Dir.glob("#{path}/**/*")
+        .select(&File.method(:file?))
+        .map(&File.method(:size))
+        .inject(:+)
+    end
+
+    def fill_hash(hash)
+      1000.times do |n|
+        hash["foo#{n}"] = 'bar' * 100
+      end
+      hash.close
+    end
+
+    it "does not compress without :block_size option" do
+      fill_hash(Hammerspace.new(path, options))
+      total.should == 319_494
+    end
+
+    it "compresses with :block_size option" do
+      fill_hash(Hammerspace.new(path, options.merge(block_size: 4096)))
+      total.should == 29_252
+    end
+  end
+
   it "bulks writes" do
     Gnista::Hash.should_receive(:write).once.and_call_original
 
